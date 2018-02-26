@@ -141,9 +141,8 @@ dropout_correction <- function(gem) {
   gem_norm <- t(apply(gem, 1, normalized_exp_pctl))
   
   # Get gene presence matrix corrected for dropouts
-  gpm <- gem
+  gpm <- gem_norm
   for (gene in rownames(gem_norm)) {
-    # Also added na.rm=TRUE
     drop_cand <- which(gem_norm[gene, ] <= quantile(gem_norm[gene, ], 0.25, na.rm = TRUE))
     for (c in drop_cand) {
       gpm[gene, c] <- D[gene, c]
