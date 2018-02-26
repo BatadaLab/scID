@@ -53,7 +53,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
   
   # Make row and column names capital
   rownames(scData) <- toupper(rownames(scData))
-  colnames(scData) <- toupper(colnames(scData))
+  #colnames(scData) <- toupper(colnames(scData))
   
   # Keep only genes in scData
   signature_genes <- intersect(signature_genes, rownames(scData))

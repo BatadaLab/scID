@@ -1,7 +1,7 @@
 #' @export
 
 final_populations <- function(score, contamination) {
-  results <- capture.output(normalmixEM(score))
+  results <- capture.output(mixtools::normalmixEM(score))
   if (results[1] %in% c("WARNING! NOT CONVERGENT! ", "Error in normalmixEM(matching_score) : Too many tries! ")) {
     matches <- c()
   } else {
