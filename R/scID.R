@@ -22,9 +22,10 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
                              positive_markers=NULL, negative_markers=NULL, contamination=0,  
                              species = "human", hk_genes = NULL, sort.signature = TRUE, do.imputation = TRUE) {
   
-  source("./dropout_correction.R")
-  source("./rank_signature_genes.R")
-  source("./calculate_score.R")
+  setwd("~/scID/R/")
+  source("dropout_correction.R")
+  source("rank_signature_genes.R")
+  source("calculate_score.R")
   
   ## embed the read.delim.with.error.handling() inside this function to make it private
   
