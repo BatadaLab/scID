@@ -18,6 +18,7 @@
 #' (default is TRUE for sorting cells)
 #' @param do.imputation Logical to choose not to correct for dropouts (default is TRUE for doing imputation)
 #' @return list of names of matching cells (IN-population) and matching score of every cell of the dataset
+#' @return list of weight per gene
 scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, signature_genes=NULL, 
                              positive_markers=NULL, negative_markers=NULL, contamination=0,  
                              species = "human", hk_genes = NULL, sort.signature = TRUE, do.imputation = TRUE) {
@@ -115,7 +116,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
       
       print(paste("Found", length(populations$IN), "cells matching"))
       
-      return(list(matches=populations$IN, matchingScore=adjusted_score))
+      return(list(matches=populations$IN, matchingScore=adjusted_score, geneWeights=weights))
     }
   }
 }
