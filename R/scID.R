@@ -25,6 +25,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
   
   setwd("~/scID/R/")
   source("dropout_correction.R")
+  source("read_data.R")
   source("rank_signature_genes.R")
   source("calculate_score.R")
   
@@ -44,13 +45,15 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
   #----------------------------------------------------------------------------------------------------
   # Read data
   if (is.null(scData)) {
-    scData <- read.delim(gem_file, stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+    scData <- loadfast(gem_file)
   }
   if (is.null(signature_genes)) {
     signature_genes <- toupper(read.table(signature_file, stringsAsFactors = FALSE)$V1)
   }
   
+  # Make row and column names capital
   rownames(scData) <- toupper(rownames(scData))
+  colnames(scData) <- toupper(colnames(scData))
   
   # Keep only genes in scData
   signature_genes <- intersect(signature_genes, rownames(scData))
