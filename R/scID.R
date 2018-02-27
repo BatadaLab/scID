@@ -98,7 +98,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
     
     if (!sort.signature | (length(populations$IN) == 0)) {
       print(paste("Found", length(populations$IN), "cells matching"))
-      return(list(matches=populations$IN, matchingScore=adjusted_score))
+      return(list(matches=populations$IN, matchingScore=adjusted_score, geneWeights=weights))
     } else {
       confident_IN <- populations$IN
       if (length(populations$OUT) > 0) {
