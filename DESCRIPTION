@@ -3,8 +3,7 @@ Title: Identifying cell types from single cell RNA-seq data
 Version: 0.0.0.9000
 Authors@R: c(
     person(given="Katerina", family="Boufea", email = "katerina.boufea@ed.ac.uk", role = c("aut", "cre")), 
-    person(given="Nizar N.", family="Batada", email = "nizar.batada@igmm.ed.ac.uk", role = "aut")
-)
+    person(given="Nizar N.", family="Batada", email = "nizar.batada@igmm.ed.ac.uk", role = "aut"))
 Description: What the package does (one paragraph).
 Depends: R (>= 3.4.1)
 License: What license is it under?
