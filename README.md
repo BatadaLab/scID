@@ -4,7 +4,7 @@ scID is a method for geneset-guided identification of cell types at the level of
 Given a gene expression matrix and a list of marker genes that define the population of interest, scID returns a matching score for each cell and the names of the identified matching cells.
 
 ## Installation
-Easy intsallation using devtools in a single command:
+Easy intsallation using the devtools R package in a single command:
 
 ```
 devtools::install_github("BatadaLab/scID")
