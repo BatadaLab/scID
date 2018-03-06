@@ -22,7 +22,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
                              positive_markers=NULL, negative_markers=NULL, contamination=0,  
                              species = "human", hk_genes = NULL, sort.signature = TRUE, do.imputation = TRUE) {
   
-  setwd("~/scID/R/")
+  #setwd("~/scID/R/")
   source("dropout_correction.R")
   source("read_data.R")
   source("rank_signature_genes.R")
