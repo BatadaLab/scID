@@ -1,5 +1,4 @@
 #' @export
-
 final_populations <- function(score, contamination) {
   results <- capture.output(mixtools::normalmixEM(score))
   if (results[1] %in% c("WARNING! NOT CONVERGENT! ", "Error in normalmixEM(matching_score) : Too many tries! ")) {
@@ -26,6 +25,7 @@ final_populations <- function(score, contamination) {
   }
 }
 
+#' @export
 adjust_score <- function(scData, matching_score, hk_genes) {
   
   # Fit linear regression between score for signature and average expression of housekeeping genes

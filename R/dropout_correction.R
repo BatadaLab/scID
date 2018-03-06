@@ -1,6 +1,4 @@
 #' @export
-
-
 normalized_exp_pctl <- function(x) {
   
   x <- x+1 
@@ -15,6 +13,7 @@ normalized_exp_pctl <- function(x) {
 #' Initialize vector of paramaters for the mixture model
 #' @param x vectors of a gene's expression across all cells
 #' @return a named vector with the initial parameters: [lambda, theta, mu, sigma]
+#' @export
 initialize_prmt_exp <- function(x) {
   
   threshold <- log2(1.01)
@@ -37,6 +36,7 @@ initialize_prmt_exp <- function(x) {
 #' @param d The posterior latent distribution
 #' @param x The vector of gene expression across all cells
 #' @return the parameters lambda, theta, mu and sigma
+#' @export
 update_prmt_exp <- function(d, x) {
   
   # Update lambda
@@ -57,6 +57,7 @@ update_prmt_exp <- function(d, x) {
 #' 1.01 used instead of 1 to avoid zero values
 #' @return a table with the estimated dropout probabilities for each gene in each cell of the gem
 #' @return a list of estimated parameters for each gene
+#' @export
 EM_for_dropout_estimation <- function(gem) {
   
   D <- data.frame(matrix(0, nrow = nrow(gem), ncol = ncol(gem)), row.names = rownames(gem))
@@ -131,6 +132,7 @@ EM_for_dropout_estimation <- function(gem) {
   return(result)
 }
 
+#' @export
 dropout_correction <- function(gem) {
   # Calculate parameters and dropout probability with exponential distr
   exp_mix_model <- EM_for_dropout_estimation(gem)

@@ -1,5 +1,3 @@
-#' @export
-
 #' Main function to get Gene expression matrix and signature genes and return matches and scores
 #' @param signature_file (optional) filename of the signature genes
 #' @param signature_genes (optional) a list of the signature genes
@@ -19,6 +17,7 @@
 #' @param do.imputation Logical to choose not to correct for dropouts (default is TRUE for doing imputation)
 #' @return list of names of matching cells (IN-population) and matching score of every cell of the dataset
 #' @return list of weight per gene
+#' @export
 scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, signature_genes=NULL, 
                              positive_markers=NULL, negative_markers=NULL, contamination=0,  
                              species = "human", hk_genes = NULL, sort.signature = TRUE, do.imputation = TRUE) {

@@ -1,9 +1,8 @@
-#' @export
-
 #' Function to choose initial IN and OUT populations with linear regression
 #' @param gem Data frame of gene expression of genes (rows) in cells (columns)
 #' @param signature_genes list of gene names (should be same format as rownames of gem)
 #' @return a lists of confident IN and OUT cells
+#' @export
 choose_unsupervised <- function(gem, signature_genes) {
   cellPct <- c()
   binned_gem <- apply(gem, 1, function(x) ifelse(x>quantile(x[which(x>0)], 0.25, na.rm = TRUE), 1, 0))
@@ -44,6 +43,7 @@ choose_unsupervised <- function(gem, signature_genes) {
 #' the dataset (columns)
 #' @return lists of confident IN (cells that express all the positive markers)
 #' and confident OUT cells (cells that do not express any of the positive markers)
+#' @export
 choose_with_positive_markers <- function(gem) {
   expressing_cells <- apply(gem, 1, function(x) names(which(x>quantile(x[which(x > 0)], 0.2, na.rm = TRUE))))
   nonexpressing_cells <- apply(gem, 1, function(x) names(which(x==0)))
@@ -66,6 +66,7 @@ choose_with_positive_markers <- function(gem) {
 #' Function to select initial OUT population from negative markers
 #' @param gem Data frame of expression of negative markers (rows) in cells of the dataset (columns)
 #' @return list of confident OUT population
+#' @export
 choose_with_negative_markers <- function(gem) {
   expressing_cells <- apply(gem, 1, function(x) names(which(x>quantile(x[which(x > 0)], 0.7, na.rm = TRUE))))
   if (nrow(gem) == 1) {
@@ -83,6 +84,7 @@ choose_with_negative_markers <- function(gem) {
 #' @param false_cells list of cell names that are confidently OUT-population
 #' should match with column names of gem
 #' @return list of SNR value for each signature gene
+#' @export
 calculate_snr <- function(gem, true_cells, false_cells) {
   
   snr <- rep(NA, nrow(gem))
@@ -96,12 +98,14 @@ calculate_snr <- function(gem, true_cells, false_cells) {
   return(snr)
 }
 
+
 #' Main function for estimation of gene ranks
 #' @param gem Data frame of gene expression (rows) in cells (columns)
 #' @param signature List of signature gene names (should match with rownames of gem)
 #' @param positive_markers (optional) List of genes that should be present in all confident IN-cells
 #' @param negative_markers (optional) List of genes that should not be present in any IN-cell
 #' @return List of weights per gene
+#' @export
 weight_signature <- function(gem, signature, positive_markers=NULL, negative_markers=NULL) {
   
   if (is.null(positive_markers)) {
