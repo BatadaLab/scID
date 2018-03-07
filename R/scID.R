@@ -28,9 +28,9 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
   if (!is.null(hk_genes)) {
     hk_genes <- toupper(hk_genes)
   } else if (species=="human") {
-    system.file("extdata", "housekeeping_hsa.txt", package = "scID")
+    hk_genes <- toupper(system.file("extdata", "housekeeping_hsa.txt", package = "scID"))
   } else if(species=="mouse") {
-    system.file("extdata", "housekeeping_mmu.txt", package = "scID")
+    hk_genes <- toupper(system.file("extdata", "housekeeping_mmu.txt", package = "scID"))
   } else {
     print("Species not known, please choose between 'human' and 'mouse' or provide a list of housekeeping genes")
   }
