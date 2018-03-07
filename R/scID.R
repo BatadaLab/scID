@@ -72,9 +72,10 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
     
     # Calculate dropout probability
     if (do.imputation) {
-      print("Calculating gene presence probability")
+      print("Calculating gene presence probability with dropout estimation")
       gpm <- dropout_correction(gem)
     } else {
+      print("Calculating gene presence probability without dropout estimation")
       gpm <- t(apply(gem, 1, normalized_exp_pctl))
     }
     # Remove NA values
@@ -87,10 +88,14 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
     weights <- weights[genes]
     gpm <- gpm[genes, ]
     
+    print("Calculate matching score")
     matching_score <- colSums(na.omit(weights*gpm))/sum(na.omit(weights))
     
+    print("Adjust matching score")
+    print(hk_genes[1:10])
     adjusted_score <- adjust_score(scData = scData, matching_score = matching_score, hk_genes = hk_genes)
     
+    print("Find populations")
     populations <- final_populations(adjusted_score, contamination = contamination)
     
     if (!sort.signature | (length(populations$IN) == 0)) {
