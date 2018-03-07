@@ -88,14 +88,9 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
     weights <- weights[genes]
     gpm <- gpm[genes, ]
     
-    print("Calculate matching score")
+    print("Calculating matching score and finding matching cells")
     matching_score <- colSums(na.omit(weights*gpm))/sum(na.omit(weights))
-    
-    print("Adjust matching score")
-    print(hk_genes[1:10])
     adjusted_score <- adjust_score(scData = scData, matching_score = matching_score, hk_genes = hk_genes)
-    
-    print("Find populations")
     populations <- final_populations(adjusted_score, contamination = contamination)
     
     if (!sort.signature | (length(populations$IN) == 0)) {
