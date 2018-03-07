@@ -38,9 +38,11 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
   #----------------------------------------------------------------------------------------------------
   # Read data
   if (is.null(scData)) {
+    print("Reading data")
     scData <- loadfast(gem_file)
   }
   if (is.null(signature_genes)) {
+    print("Reading signature genes")
     signature_genes <- toupper(read.table(signature_file, stringsAsFactors = FALSE)$V1)
   }
   
@@ -55,6 +57,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
   # Find score for signature genes
   # Calculate specificity
   if (sort.signature) {
+    print("Sorting gene signature")
     weights <- weight_signature(gem=scData, signature = signature_genes, positive_markers, negative_markers)
   } else {
     weights <- rep(1, length(signature_genes))
@@ -69,6 +72,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
     
     # Calculate dropout probability
     if (do.imputation) {
+      print("Calculating gene presence probability")
       gpm <- dropout_correction(gem)
     } else {
       gpm <- t(apply(gem, 1, normalized_exp_pctl))
@@ -93,6 +97,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
       print(paste("Found", length(populations$IN), "cells matching"))
       return(list(matches=populations$IN, matchingScore=adjusted_score, geneWeights=weights))
     } else {
+      print("Second iteration to reduce False Discoveries")
       confident_IN <- populations$IN
       if (length(populations$OUT) > 0) {
         confident_OUT <- populations$OUT
