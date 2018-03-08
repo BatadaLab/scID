@@ -22,6 +22,26 @@ To account for cell quality differences, scID uses the expression of housekeepin
 
 ## Example code
 
+* For providing filenames as input:
+```
+library(scID)
+scID_output <- scid_match_cells(signature_file = "signature_filename", gem_file = "GEM_filenamee", species = "human")
+```
+
+* For providing datasets already loaded on R environment:
+```
+scID_output <- scid_match_cells(signature_genes = signature_list, scData = GEM_dataframe, species = "mouse")
+```
+
+* Output consists of three objects; the selected matching cells, a list of matching scores for all cells of the dataset, a list of gene weights generated during the sorting step.
+```
+matching_cells <- scID_output$matches
+matching_scores <- scID_output$matchingScore
+gene_weights <- scID_output$geneWeights
+```
+
+
+
 
 
 
