@@ -15,12 +15,14 @@
 #' @param sort.signature Logical to choose to skip gene sorting and give equal weights to all genes
 #' (default is TRUE for sorting cells)
 #' @param do.imputation Logical to choose not to correct for dropouts (default is TRUE for doing imputation)
+#' @param gene.weigts list of weights for the signature genes if known
 #' @return list of names of matching cells (IN-population) and matching score of every cell of the dataset
 #' @return list of weight per gene
 #' @export
 scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, signature_genes=NULL, 
                              positive_markers=NULL, negative_markers=NULL, contamination=0,  
-                             species = "human", hk_genes = NULL, sort.signature = TRUE, do.imputation = TRUE) {
+                             species = "human", hk_genes = NULL, sort.signature = TRUE, do.imputation = TRUE, 
+                             gene.weights=NULL) {
   
   ## embed the read.delim.with.error.handling() inside this function to make it private
   
@@ -56,16 +58,8 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
   #----------------------------------------------------------------------------------------------------
   # Find score for signature genes
   # Calculate specificity
-  if (sort.signature) {
-    print("Sorting gene signature")
-    weights <- weight_signature(gem=scData, signature = signature_genes, positive_markers, negative_markers)
-  } else {
-    weights <- rep(1, length(signature_genes))
-    names(weights) <- signature_genes
-  }
-  if (typeof(weights)=="character") {
-    print(weights)
-  } else {
+  if (!is.null(gene.weights)) {
+    weights <- gene.weights
     # Log transform data (log(gem+1.01))
     gem <- scData[names(which(weights > 0)), ]
     gem <- log2(apply(gem, c(1,2), function(x) 2^x-1) + 1.01)
@@ -93,32 +87,72 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
     adjusted_score <- adjust_score(scData = scData, matching_score = matching_score, hk_genes = hk_genes)
     populations <- final_populations(adjusted_score, contamination = contamination)
     
-    if (!sort.signature | (length(populations$IN) == 0)) {
-      print(paste("Found", length(populations$IN), "cells matching"))
-      return(list(matches=populations$IN, matchingScore=adjusted_score, geneWeights=weights))
+    print(paste("Found", length(populations$IN), "cells matching"))
+    return(list(matches=populations$IN, matchingScore=adjusted_score, geneWeights=weights))
+  } else {
+    if (sort.signature) {
+      print("Sorting gene signature")
+      weights <- weight_signature(gem=scData, signature = signature_genes, positive_markers, negative_markers)
     } else {
-      print("Second iteration to reduce False Discoveries")
-      confident_IN <- populations$IN
-      if (length(populations$OUT) > 0) {
-        confident_OUT <- populations$OUT
+      weights <- rep(1, length(signature_genes))
+      names(weights) <- signature_genes
+    }
+    if (typeof(weights)=="character") {
+      print(weights)
+    } else {
+      # Log transform data (log(gem+1.01))
+      gem <- scData[names(which(weights > 0)), ]
+      gem <- log2(apply(gem, c(1,2), function(x) 2^x-1) + 1.01)
+      
+      # Calculate dropout probability
+      if (do.imputation) {
+        print("Calculating gene presence probability with dropout estimation")
+        gpm <- dropout_correction(gem)
       } else {
-        rest_cells <- setdiff(colnames(scData), confident_IN)
-        confident_OUT <- rest_cells[sample(length(rest_cells), 0.2*length(rest_cells))]
+        print("Calculating gene presence probability without dropout estimation")
+        gpm <- t(apply(gem, 1, normalized_exp_pctl))
       }
+      # Remove NA values
+      na.values <- which(apply(gpm, 1, function(x){any(is.na(x))}))
+      if (length(na.values > 0)) {
+        gpm <- gpm[-na.values, ]
+      }
+      # Calculate matching score
+      genes <- intersect(names(weights), rownames(gpm))
+      weights <- weights[genes]
+      gpm <- gpm[genes, ]
       
-      # Re-weight signature with better IN and OUT cells
-      snr <- calculate_snr(na.omit(scData[genes, ]), true_cells = confident_IN, false_cells = confident_OUT)
-      weights <- snr/max(snr)
-      
+      print("Calculating matching score and finding matching cells")
       matching_score <- colSums(na.omit(weights*gpm))/sum(na.omit(weights))
       adjusted_score <- adjust_score(scData = scData, matching_score = matching_score, hk_genes = hk_genes)
-      
       populations <- final_populations(adjusted_score, contamination = contamination)
       
-      print(paste("Found", length(populations$IN), "cells matching"))
-      
-      return(list(matches=populations$IN, matchingScore=adjusted_score, geneWeights=weights))
+      if (!sort.signature | (length(populations$IN) == 0)) {
+        print(paste("Found", length(populations$IN), "cells matching"))
+        return(list(matches=populations$IN, matchingScore=adjusted_score, geneWeights=weights))
+      } else {
+        print("Second iteration to reduce False Discoveries")
+        confident_IN <- populations$IN
+        if (length(populations$OUT) > 0) {
+          confident_OUT <- populations$OUT
+        } else {
+          rest_cells <- setdiff(colnames(scData), confident_IN)
+          confident_OUT <- rest_cells[sample(length(rest_cells), 0.2*length(rest_cells))]
+        }
+        
+        # Re-weight signature with better IN and OUT cells
+        snr <- calculate_snr(na.omit(scData[genes, ]), true_cells = confident_IN, false_cells = confident_OUT)
+        weights <- snr/max(snr)
+        
+        matching_score <- colSums(na.omit(weights*gpm))/sum(na.omit(weights))
+        adjusted_score <- adjust_score(scData = scData, matching_score = matching_score, hk_genes = hk_genes)
+        
+        populations <- final_populations(adjusted_score, contamination = contamination)
+        
+        print(paste("Found", length(populations$IN), "cells matching"))
+        
+        return(list(matches=populations$IN, matchingScore=adjusted_score, geneWeights=weights))
+      }
     }
   }
 }
-
