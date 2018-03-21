@@ -5,21 +5,11 @@ final_populations <- function(score, contamination) {
     matches <- c()
   } else {
     mixmdl <- mixtools::normalmixEM(score, k=2, maxit = 10000, fast = TRUE)
-    #plot(mixmdl,which=2)
-    # select threshold based on purity
-    if (mixmdl$mu[1] > mixmdl$mu[2]) {
-      j <- 1
-      i <-2
-    } else {
-      j <- 2
-      i <- 1
-    }
-    curve <- mixmdl$lambda[j] * dnorm(score, m=mixmdl$mu[j], sd=mixmdl$sigma[j]) / (mixmdl$lambda[j] * dnorm(score, m=mixmdl$mu[j], sd=mixmdl$sigma[j]) + mixmdl$lambda[i] * dnorm(score, m=mixmdl$mu[i], sd=mixmdl$sigma[i]))
-    #plot(matching_score, curve)
-    
     # Ask user to choose allowed contamination percentage
-    IN <- names(which(curve >= (1-contamination)))
-    OUT <- names(which(curve <= quantile(curve, 0.1)))
+    IN <- intersect(names(adjusted_score)[which(mixmdl$posterior[, which(mixmdl$mu == max(mixmdl$mu))] >= 1-contamination)], 
+                    names(adjusted_score)[which(adjusted_score >= min(mixmdl$mu))])
+    OUT <- intersect(names(adjusted_score)[which(mixmdl$posterior[, which(mixmdl$mu == min(mixmdl$mu))] > 0.5)], 
+                     names(adjusted_score)[which(adjusted_score <= min(mixmdl$mu))])
     
     return(list(IN=IN, OUT=OUT))
   }
