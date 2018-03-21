@@ -22,7 +22,7 @@
 scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, signature_genes=NULL, 
                              positive_markers=NULL, negative_markers=NULL, contamination=0,  
                              species = "human", hk_genes = NULL, sort.signature = TRUE, do.imputation = TRUE, 
-                             gene.weights=NULL) {
+                             gene.weights=NULL, datasetID = NULL) {
   
   ## embed the read.delim.with.error.handling() inside this function to make it private
   
@@ -124,7 +124,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
       
       print("Calculating matching score and finding matching cells")
       matching_score <- colSums(na.omit(weights*gpm))/sum(na.omit(weights))
-      adjusted_score <- adjust_score(scData = scData, matching_score = matching_score, hk_genes = hk_genes)
+      adjusted_score <- adjust_score(scData = scData, matching_score = matching_score, hk_genes = hk_genes, datasetID)
       populations <- final_populations(adjusted_score, contamination = contamination)
       
       if (!sort.signature | (length(populations$IN) == 0)) {
@@ -145,7 +145,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
         weights <- snr/max(snr)
         
         matching_score <- colSums(na.omit(weights*gpm))/sum(na.omit(weights))
-        adjusted_score <- adjust_score(scData = scData, matching_score = matching_score, hk_genes = hk_genes)
+        adjusted_score <- adjust_score(scData = scData, matching_score = matching_score, hk_genes = hk_genes, datasetID)
         
         populations <- final_populations(adjusted_score, contamination = contamination)
         

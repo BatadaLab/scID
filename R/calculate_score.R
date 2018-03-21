@@ -16,15 +16,24 @@ final_populations <- function(score, contamination) {
 }
 
 #' @export
-adjust_score <- function(scData, matching_score, hk_genes) {
-  
+adjust_score <- function(scData, matching_score, hk_genes, dtstID=NULL) {
   # Fit linear regression between score for signature and average expression of housekeeping genes
-  avg_hk_expression <- colMeans(scData[intersect(rownames(scData), hk_genes), ])
-  
-  data <- data.frame(matching_score=matching_score, avg_hk_expression=avg_hk_expression[names(matching_score)])
-  fit <- lm(matching_score ~ avg_hk_expression, data = data)
-  adjusted_score <- residuals(fit)
-  
+  if (!is.null(dtstID)) {
+    classes <- unique(dtstID)
+    adjusted_score <- c()
+    for (i in 1:length(classes)) {
+      gem <- scData[, names(which(dtstID == classes[i]))]
+      avg_hk_expression <- colMeans(gem[intersect(rownames(gem), hk_genes), ])
+      data <- data.frame(matching_score=matching_score, avg_hk_expression=avg_hk_expression[names(matching_score)])
+      fit <- lm(matching_score ~ avg_hk_expression, data = data)
+      adjusted_score <- c(adjusted_score, residuals(fit))
+    }
+  } else {
+    avg_hk_expression <- colMeans(scData[intersect(rownames(scData), hk_genes), ])
+    data <- data.frame(matching_score=matching_score, avg_hk_expression=avg_hk_expression[names(matching_score)])
+    fit <- lm(matching_score ~ avg_hk_expression, data = data)
+    adjusted_score <- residuals(fit)
+  }
   return(adjusted_score)
 }
 
