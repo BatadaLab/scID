@@ -6,10 +6,10 @@ final_populations <- function(score, contamination) {
   } else {
     mixmdl <- mixtools::normalmixEM(score, k=2, maxit = 10000, fast = TRUE)
     # Ask user to choose allowed contamination percentage
-    IN <- intersect(names(adjusted_score)[which(mixmdl$posterior[, which(mixmdl$mu == max(mixmdl$mu))] >= 1-contamination)], 
-                    names(adjusted_score)[which(adjusted_score >= min(mixmdl$mu))])
-    OUT <- intersect(names(adjusted_score)[which(mixmdl$posterior[, which(mixmdl$mu == min(mixmdl$mu))] > 0.5)], 
-                     names(adjusted_score)[which(adjusted_score <= min(mixmdl$mu))])
+    IN <- intersect(names(score)[which(mixmdl$posterior[, which(mixmdl$mu == max(mixmdl$mu))] >= 1-contamination)], 
+                    names(score)[which(score >= min(mixmdl$mu))])
+    OUT <- intersect(names(score)[which(mixmdl$posterior[, which(mixmdl$mu == min(mixmdl$mu))] > 0.5)], 
+                     names(score)[which(score <= min(mixmdl$mu))])
     
     return(list(IN=IN, OUT=OUT))
   }
