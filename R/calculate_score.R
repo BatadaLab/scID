@@ -29,10 +29,10 @@ adjust_score <- function(scData, matching_score, hk_genes, dtstID=NULL) {
       adjusted_score <- c(adjusted_score, residuals(fit))
     }
     # Additionally, adjust for different number of genes per cell between experiments
-    genes_per_cell <- apply(scData, 2, function(x) sum(x>0))
-    data <- data.frame(matching_score=adjusted_score, genes_per_cell=genes_per_cell)
-    fit <- lm(matching_score ~ genes_per_cell, data = data)
-    adjusted_score <- residuals(fit)
+    #genes_per_cell <- apply(scData, 2, function(x) sum(x>0))
+    #data <- data.frame(matching_score=adjusted_score, genes_per_cell=genes_per_cell)
+    #fit <- lm(matching_score ~ genes_per_cell, data = data)
+    #adjusted_score <- residuals(fit)
   } else {
     avg_hk_expression <- colMeans(scData[intersect(rownames(scData), hk_genes), ])
     data <- data.frame(matching_score=matching_score, avg_hk_expression=avg_hk_expression[names(matching_score)])
