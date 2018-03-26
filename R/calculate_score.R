@@ -24,7 +24,7 @@ adjust_score <- function(scData, matching_score, hk_genes, dtstID=NULL) {
     for (i in 1:length(classes)) {
       gem <- scData[, names(which(dtstID == classes[i]))]
       avg_hk_expression <- colMeans(gem[intersect(rownames(gem), hk_genes), ])
-      data <- data.frame(matching_score=matching_score(colnames(gem)), avg_hk_expression=avg_hk_expression)
+      data <- data.frame(matching_score=matching_score[colnames(gem)], avg_hk_expression=avg_hk_expression)
       fit <- lm(matching_score ~ avg_hk_expression, data = data)
       adjusted_score <- c(adjusted_score, residuals(fit))
     }
