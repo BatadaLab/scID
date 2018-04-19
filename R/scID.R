@@ -45,12 +45,12 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
   }
   if (is.null(signature_genes)) {
     print("Reading signature genes")
-    signature_genes <- toupper(read.table(signature_file, stringsAsFactors = FALSE)$V1)
+    signature_genes <- read.table(signature_file, stringsAsFactors = FALSE)$V1
   }
   
-  # Make row and column names capital
+  # Make rownames and signature upper case
   rownames(scData) <- toupper(rownames(scData))
-  #colnames(scData) <- toupper(colnames(scData))
+  signature_genes <- toupper(signature_genes)
   
   # Keep only genes in scData
   signature_genes <- intersect(signature_genes, rownames(scData))
