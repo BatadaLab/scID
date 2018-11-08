@@ -5,9 +5,8 @@
 \title{Main function to get Gene expression matrix and signature genes and return matches and scores}
 \usage{
 scid_match_cells(signature_file = NULL, gem_file = NULL, scData = NULL,
-  signature_genes = NULL, positive_markers = NULL,
-  negative_markers = NULL, contamination = 0, species = "human",
-  hk_genes = NULL, sort.signature = TRUE, do.imputation = TRUE)
+  signature_genes = NULL, contamination = 0, sort.signature = TRUE,
+  gene.weights = NULL)
 }
 \arguments{
 \item{signature_file}{(optional) filename of the signature genes}
@@ -20,25 +19,17 @@ either gem_file or scData must be given as input}
 \item{signature_genes}{(optional) a list of the signature genes
 either signature_file or signature_genes must be given as input}
 
-\item{positive_markers}{list of genes that should be present in confident IN cells (optional)}
-
-\item{negative_markers}{list of genes that should not be present in any IN cell (optional)}
-
 \item{contamination}{Percentage of accepted cells that belong to the common area between 
 IN and OUT population distributions}
 
-\item{species}{Choose between "human" and "mouse" to use a predefined list of housekeeping
-genes for cell quality correction}
-
-\item{hk_genes}{List of houskeeping genes in case species not defined}
-
-\item{sort.signature}{Logical to choose to skip gene sorting and give equal weights to all genes
-(default is TRUE for sorting cells)}
-
 \item{do.imputation}{Logical to choose not to correct for dropouts (default is TRUE for doing imputation)}
+
+\item{gene.weigts}{list of weights for the signature genes if known}
 }
 \value{
-list of names of matching cells (IN-population) and matching score of every cell of the dataset
+list of names of matching cells (IN-population) and
+
+matching score of every cell of the dataset
 
 list of weight per gene
 }
