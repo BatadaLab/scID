@@ -51,16 +51,16 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, gem=NULL, signa
       gem_norm <- gem_norm[-na.values, ]
     }
     
-    if (is.null(weights)) {
+    if (is.null(gene.weights)) {
       putative_groups <- choose_unsupervised(gem, signature_genes)
-      weights <- scID_weight(gem_norm, putative_groups$in_pop, putative_groups$out_pop)
+      gene.weights <- scID_weight(gem_norm, putative_groups$in_pop, putative_groups$out_pop)
     }
     
-    weighted_gem <- weights[rownames(gem_norm)] * gem_norm
+    weighted_gem <- gene.weights[rownames(gem_norm)] * gem_norm
     
-    score <- colSums(weighted_gem)/sum(weights[rownames(gem_norm)])
+    score <- colSums(weighted_gem)/sum(gene.weights[rownames(gem_norm)])
     
-    if (is.null(weights)) {
+    if (is.null(gene.weights)) {
       #lambda_est <- c(length(putative_groups$out_pop)/ncol(gem), length(putative_groups$in_pop)/ncol(gem))
       #mean_est <- c(mean(score[putative_groups$out_pop]), mean(score[putative_groups$in_pop]))
       #sd_est <- c(sd(score[putative_groups$out_pop]), sd(score[putative_groups$in_pop]))
@@ -69,7 +69,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, gem=NULL, signa
       matches <- final_populations(score, contamination)
     }
     
-    return(list(matches=matches, matchingScore=score, weights=weights))
+    return(list(matches=matches, matchingScore=score, weights=scID_weights))
     
   }
 }
