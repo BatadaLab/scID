@@ -47,9 +47,13 @@ sobj_ref <- RunTSNE(sobj_ref, dims.use = 1:5, do.fast = T)
 TSNEPlot(sobj_ref, do.label = T, pt.size = 0.1, no.axes = T, no.legend = T)
 ```
 This results in 15 clusters as shown in the tSNE plot
-![tSNE](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Reference_tSNE.png)
+![](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Reference_tSNE.png)
 
-
+Next, we find poitive markers of these 15 clusters using MAST.
+```
+markers <- FindAllMarkers(sobj_ref, only.pos = TRUE, test.use = "MAST", logfc.threshold = 0.5)
+DoHeatmap(sobj_ref, genes.use = markers$gene, slim.col.label = T, remove.key = T, cex.row = 3)
+```
 
 
 
