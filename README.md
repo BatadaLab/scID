@@ -26,8 +26,14 @@ After loading the libraries we read the files
 ```
 library(scID)
 library(Seurat)
+
+reference_gem <- readRDS(file="~/scID/ExampleData/reference_gem.rds")
+target_gem <- readRDS(file="~/scID/ExampleData/target_gem.rds")
 ```
 
+scID can take a list of features without reference cells, e.g. curated lists of markers. However, often such information is not available, thus, we can extract the features from a clustered reference dataset.
+
+Here, we will cluster the reference data using [Seurat](https://satijalab.org/seurat/) 
 
 
 
