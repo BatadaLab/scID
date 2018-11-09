@@ -33,7 +33,22 @@ target_gem <- readRDS(file="~/scID/ExampleData/target_gem.rds")
 
 scID can take a list of features without reference cells, e.g. curated lists of markers. However, often such information is not available, thus, we can extract the features from a clustered reference dataset.
 
-Here, we will cluster the reference data using [Seurat](https://satijalab.org/seurat/) 
+Here, we will cluster the reference data using [Seurat](https://satijalab.org/seurat/) and extract markers for each cluster.
+```
+sobj_ref <- CreateSeuratObject(raw.data = reference_gem)
+sobj_ref <- NormalizeData(sobj_ref)
+sobj_ref <- ScaleData(sobj_ref)
+sobj_ref <- FindVariableGenes(sobj_ref)
+sobj_ref <- RunPCA(sobj_ref,  do.print = FALSE)
+sobj_ref <- ProjectPCA(sobj_ref)
+sobj_ref <- FindClusters(sobj_ref, dims.use = 1:5, save.SNN = F)
+sobj_ref <- RunTSNE(sobj_ref, dims.use = 1:5, do.fast = T)
+
+TSNEPlot(sobj_ref, do.label = T, pt.size = 0.1, no.axes = T, no.legend = T)
+```
+This results in 15 clusters as shown in the tSNE plot
+![]("~/scID/ExampleData/Reference_tSNE")
+
 
 
 
