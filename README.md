@@ -26,6 +26,8 @@ After loading the libraries we read the files
 ```
 library(scID)
 library(Seurat)
+library(pheatmap)
+
 
 reference_gem <- readRDS(file="~/scID/ExampleData/reference_gem.rds")
 target_gem <- readRDS(file="~/scID/ExampleData/target_gem.rds")
@@ -49,11 +51,88 @@ TSNEPlot(sobj_ref, do.label = T, pt.size = 0.1, no.axes = T, no.legend = T)
 This results in 15 clusters as shown in the tSNE plot
 ![](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Reference_tSNE.png)
 
-Next, we find poitive markers of these 15 clusters using MAST.
+Next, we find positive markers of these 15 clusters using MAST.
 ```
 markers <- FindAllMarkers(sobj_ref, only.pos = TRUE, test.use = "MAST", logfc.threshold = 0.5)
-DoHeatmap(sobj_ref, genes.use = markers$gene, slim.col.label = T, remove.key = T, cex.row = 3)
 ```
+The next heatmap shows the average expression of each markers' list in each of the reference clusters. Each row represents a markers' list and each column a cluster of cells.
+```
+gem_avg_ref <- matrix(NA, length(unique(sobj_ref@ident)), length(unique(sobj_ref@ident)))
+for (i in 1:length(unique(sobj_ref@ident))) {
+  cells <- WhichCells(sobj_ref, i-1)
+  if (length(unique(sobj_ref@ident)) > 1) {
+    avg_exp <- rowMeans(reference_gem[markers$gene, cells])
+  } else if (length(cells) == 1) {
+    avg_exp <- gem[markers$gene, cells]
+    names(avg_exp) <- markers$gene
+  } else {
+    next
+  }
+  for (j in 1:length(unique(sobj_ref@ident))) {
+    gem_avg_ref[j,i] <- mean(na.omit(avg_exp[markers$gene[which(markers$cluster == j-1)]]))
+  }
+}
+
+pheatmap(gem_avg_ref, border="white", color = colorspace::diverge_hsv(50), cluster_rows = F,
+         cluster_cols = F, show_colnames = F, fontsize_row = 3, border_color = F,show_rownames = F,
+         scale = "row")
+```
+![](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Reference_heatmap.png)
+
+Now that we have extracted features of the reference clusters we can map the target nuclei data to these clusters with scID. 
+For multiclass mapping we propose the following approach:
+
+* **Step 1:** We run scID for each of the sets of features and store the scores of the matching cells in a table.
+```
+scores <- data.frame(matrix(NA, length(unique(sobj_9k@ident)), ncol(target_gem)), row.names = unique(sobj_9k@ident))
+colnames(scores) <- colnames(target_gem)
+for (celltype in unique(sobj_9k@ident)) {
+  signature <- markers$gene[which(markers$cluster == celltype)]
+  res <- scid_match_cells(gem = target_gem, signature_genes = signature, contamination = 0.05)
+  scores[celltype, res$matches] <- scale(res$matchingScore[res$matches])
+}
+```
+
+* **Step 2:** Now we need to resolve any conflicts. In datasets that are sparse and/or have very similar subtypes of cells, it is common for a cell to be selected as matching to more that one signatures. To resolve this issue, we need to make the cell’s scores for the different sets of features for which it was a match comparable. Thus why in the previous step, the scores of matching cells for each set of features are centered and we resolve conflicting classes by assigning each cell to the class with the highest score. Cells that were not selected by any of the gene lists are marked as "unassigned".
+
+```
+scID_labels <- c()
+for (cell in colnames(scores)) {
+  if (all(is.na(scores[, cell]))) {
+    matching_type <- "unassigned"
+  } else {
+    matching_type <- rownames(scores)[which(scores[, cell] == max(scores[, cell], na.rm = T))]
+  }
+  scID_labels <- c(scID_labels, matching_type)
+}
+names(scID_labels) <- colnames(scores)
+```
+
+Now we can visualize the average expression of these gene lists in each group of target cells as clustered by scID. 
+
+```
+markers_filt <- markers[which(markers$gene %in% rownames(target_gem)), ]
+gem_avg <- matrix(NA, length(unique(sobj_9k@ident)), length(unique(sobj_9k@ident)))
+for (i in 1:length(unique(sobj_9k@ident))) {
+  cells <- names(scID_labels)[which(scID_labels == i-1)]
+  if (length(cells) > 1) {
+    avg_exp <- rowMeans(target_gem[markers_filt$gene, cells])
+  } else if (length(cells) == 1) {
+    avg_exp <- target_gem[markers_filt$gene, cells]
+    names(avg_exp) <- markers_filt$gene
+  } else {
+    next
+  }
+  for (j in 1:length(unique(sobj_9k@ident))) {
+    gem_avg[j,i] <- mean(na.omit(avg_exp[markers_filt$gene[which(markers_filt$cluster == j-1)]]))
+  }
+}
+
+pheatmap(gem_avg, border="white",color = colorspace::diverge_hsv(50), cluster_rows = F,
+         cluster_cols = F, show_colnames = F, fontsize_row = 3, border_color = F,show_rownames = F,
+         scale = "row")
+```
+![](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Target_heatmap.png)
 
 
 
