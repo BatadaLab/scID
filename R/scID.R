@@ -3,8 +3,8 @@
 #' @param signature_genes (optional) a list of the signature genes
 #' either signature_file or signature_genes must be given as input
 #' @param gem_file (optional) filename of the gene expression matrix
-#' @param scData (optional) Data frame of gene expression (rows) per cell (columns)
-#' either gem_file or scData must be given as input
+#' @param gem (optional) Data frame of gene expression (rows) per cell (columns)
+#' either gem_file or gem must be given as input
 #' @param contamination Percentage of accepted cells that belong to the common area between 
 #' IN and OUT population distributions
 #' @param do.imputation Logical to choose not to correct for dropouts (default is TRUE for doing imputation)
@@ -13,14 +13,14 @@
 #' @return matching score of every cell of the dataset
 #' @return list of weight per gene
 #' @export
-scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, signature_genes=NULL, 
+scid_match_cells <- function(signature_file=NULL, gem_file=NULL, gem=NULL, signature_genes=NULL, 
                              contamination=0, sort.signature = TRUE, gene.weights=NULL) {
   
   #----------------------------------------------------------------------------------------------------
   # Read data
-  if (is.null(scData)) {
+  if (is.null(gem)) {
     print("Reading data")
-    scData <- loadfast(gem_file)
+    gem <- loadfast(gem_file)
   }
   if (is.null(signature_genes)) {
     print("Reading signature genes")
@@ -28,11 +28,11 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, scData=NULL, si
   }
   
   # Make rownames and signature upper case
-  rownames(scData) <- toupper(rownames(scData))
+  rownames(gem) <- toupper(rownames(gem))
   signature_genes <- toupper(signature_genes)
   
   # Keep only genes in scData
-  signature_genes <- intersect(signature_genes, rownames(scData))
+  signature_genes <- intersect(signature_genes, rownames(gem))
   
   #----------------------------------------------------------------------------------------------------
   # Find score for signature genes
