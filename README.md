@@ -47,7 +47,7 @@ sobj_ref <- RunTSNE(sobj_ref, dims.use = 1:5, do.fast = T)
 TSNEPlot(sobj_ref, do.label = T, pt.size = 0.1, no.axes = T, no.legend = T)
 ```
 This results in 15 clusters as shown in the tSNE plot
-![]("~/scID/ExampleData/Reference_tSNE")
+![]("/ExampleData/Reference_tSNE")
 
 
 
