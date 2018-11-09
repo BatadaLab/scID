@@ -47,7 +47,7 @@ sobj_ref <- RunTSNE(sobj_ref, dims.use = 1:5, do.fast = T)
 TSNEPlot(sobj_ref, do.label = T, pt.size = 0.1, no.axes = T, no.legend = T)
 ```
 This results in 15 clusters as shown in the tSNE plot
-![tSNE](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Reference_tSNE.png | width=100x)
+![tSNE](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Reference_tSNE.png){:height="50%" width="50%"}
 
 
 
