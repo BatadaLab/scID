@@ -1,5 +1,5 @@
 #' @export
-normalized_exp_pctl <- function(x) {
+normalize_gem <- function(x) {
   
   x <- x+1 
   # Added na.rm=TRUE -- see if changes anything
