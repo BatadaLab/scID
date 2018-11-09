@@ -69,7 +69,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, gem=NULL, signa
       matches <- final_populations(score, contamination)
     }
     
-    return(list(matches=matches, matchingScore=score, weights=scID_weights))
+    return(list(matches=matches, matchingScore=score, weights=gene.weights))
     
   }
 }
