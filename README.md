@@ -17,16 +17,11 @@ devtools::install_github("BatadaLab/scID")
 
 ## Input parameters
 
-scID input should be a TPM-normalised Gene Expression Matrix and a list of genes that describe the population of interest. Both datasets can be read from files or given as ready R objects (matrix/data.frame/list). Additionally, the user can specify a subset of the gene signature that required to be expressed in all cells of the IN-population (positive markers) and a set of negative markers that should not be expressed in any cells of the IN-population. Both sets of genes can help scID more accuratelly prioritize the signature genes when the background is very similar to the target population, but are not necessary. 
-To account for cell quality differences, scID uses the expression of housekeeping genes in the cells. We currently provide lists of housekeeping genes for human and mouse datasets by specifying species as input (default is human). When gene expression comes from a different species you need to also provide the list of housekeeping genes for your orgnaism.
+scID input should be a TPM-normalised Gene Expression Matrix and a list of genes that describe the population of interest. Both datasets can be read from files or given as ready R objects (matrix/data.frame/list). 
 
-## Example code
+## Tutorial
+This tutorial is an example pipeline for mapping across two 10X datasets of E18 mouse brain cells and nuclei from cortex, hippocampus and subverticular zone. The raw counts for the reference and the target data can be found here[Reference](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/neuron_9k) and here[target](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/nuclei_900) respectively. 
 
-* For providing filenames as input:
-```
-library(scID)
-scID_output <- scid_match_cells(signature_file = "signature_filename", gem_file = "GEM_filename")
-```
 
 * For providing datasets already loaded on R environment:
 ```
