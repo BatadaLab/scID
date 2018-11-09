@@ -64,7 +64,7 @@ scid_match_cells <- function(signature_file=NULL, gem_file=NULL, gem=NULL, signa
       #lambda_est <- c(length(putative_groups$out_pop)/ncol(gem), length(putative_groups$in_pop)/ncol(gem))
       #mean_est <- c(mean(score[putative_groups$out_pop]), mean(score[putative_groups$in_pop]))
       #sd_est <- c(sd(score[putative_groups$out_pop]), sd(score[putative_groups$in_pop]))
-      matches <- final_populations(score, contamination, lambda_est, mean_est, sd_est)
+      matches <- final_populations(score, contamination)#, lambda_est, mean_est, sd_est)
     } else {
       matches <- final_populations(score, contamination)
     }
