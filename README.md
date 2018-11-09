@@ -57,7 +57,9 @@ markers <- FindAllMarkers(sobj_ref, only.pos = TRUE, test.use = "MAST", logfc.th
 ```
 The next heatmap shows the average expression of each markers' list in each of the reference clusters. Each row represents a markers' list and each column a cluster of cells.
 ```
-gem_avg_ref <- matrix(NA, length(unique(sobj_ref@ident)), length(unique(sobj_ref@ident)))
+gem_avg_ref <- data.frame(matrix(NA, length(unique(sobj_ref@ident)), length(unique(sobj_ref@ident))), 
+                          row.names = paste("Cluster", unique(sobj_ref@ident), "geneset", sep = "_"))
+colnames(gem_avg_ref) <- paste("Cluster", unique(sobj_ref@ident), sep = "_")
 for (i in 1:length(unique(sobj_ref@ident))) {
   cells <- WhichCells(sobj_ref, i-1)
   if (length(unique(sobj_ref@ident)) > 1) {
@@ -74,7 +76,7 @@ for (i in 1:length(unique(sobj_ref@ident))) {
 }
 
 pheatmap(gem_avg_ref, border="white", color = colorspace::diverge_hsv(50), cluster_rows = F,
-         cluster_cols = F, show_colnames = F, fontsize_row = 3, border_color = F,show_rownames = F,
+         cluster_cols = F, show_colnames = T, fontsize_row = 10, border_color = F,show_rownames = T,
          scale = "row")
 ```
 ![](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Reference_heatmap.png)
@@ -112,8 +114,11 @@ Now we can visualize the average expression of these gene lists in each group of
 
 ```
 markers_filt <- markers[which(markers$gene %in% rownames(target_gem)), ]
-gem_avg <- matrix(NA, length(unique(sobj_9k@ident)), length(unique(sobj_9k@ident)))
-for (i in 1:length(unique(sobj_9k@ident))) {
+gem_avg_targ <- data.frame(matrix(NA, length(unique(sobj_ref@ident)), length(unique(sobj_ref@ident))),
+                      row.names = paste("Cluster", unique(sobj_ref@ident), "geneset", sep = "_"))
+colnames(gem_avg_targ) <- paste("Cluster", unique(sobj_ref@ident), sep = "_")
+
+for (i in 1:length(unique(sobj_ref@ident))) {
   cells <- names(scID_labels)[which(scID_labels == i-1)]
   if (length(cells) > 1) {
     avg_exp <- rowMeans(target_gem[markers_filt$gene, cells])
@@ -123,13 +128,13 @@ for (i in 1:length(unique(sobj_9k@ident))) {
   } else {
     next
   }
-  for (j in 1:length(unique(sobj_9k@ident))) {
-    gem_avg[j,i] <- mean(na.omit(avg_exp[markers_filt$gene[which(markers_filt$cluster == j-1)]]))
+  for (j in 1:length(unique(sobj_ref@ident))) {
+    gem_avg_targ[j,i] <- mean(na.omit(avg_exp[markers_filt$gene[which(markers_filt$cluster == j-1)]]))
   }
 }
 
-pheatmap(gem_avg, border="white",color = colorspace::diverge_hsv(50), cluster_rows = F,
-         cluster_cols = F, show_colnames = F, fontsize_row = 3, border_color = F,show_rownames = F,
+pheatmap(gem_avg_targ, border="white",color = colorspace::diverge_hsv(50), cluster_rows = F,
+         cluster_cols = F, show_colnames = T, fontsize_row = 10, border_color = F,show_rownames = T,
          scale = "row")
 ```
 ![](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Target_heatmap.png)
