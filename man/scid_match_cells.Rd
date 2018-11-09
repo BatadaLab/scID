@@ -4,7 +4,7 @@
 \alias{scid_match_cells}
 \title{Main function to get Gene expression matrix and signature genes and return matches and scores}
 \usage{
-scid_match_cells(signature_file = NULL, gem_file = NULL, scData = NULL,
+scid_match_cells(signature_file = NULL, gem_file = NULL, gem = NULL,
   signature_genes = NULL, contamination = 0, sort.signature = TRUE,
   gene.weights = NULL)
 }
@@ -13,8 +13,8 @@ scid_match_cells(signature_file = NULL, gem_file = NULL, scData = NULL,
 
 \item{gem_file}{(optional) filename of the gene expression matrix}
 
-\item{scData}{(optional) Data frame of gene expression (rows) per cell (columns)
-either gem_file or scData must be given as input}
+\item{gem}{(optional) Data frame of gene expression (rows) per cell (columns)
+either gem_file or gem must be given as input}
 
 \item{signature_genes}{(optional) a list of the signature genes
 either signature_file or signature_genes must be given as input}

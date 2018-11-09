@@ -3,6 +3,6 @@
 export(choose_unsupervised)
 export(final_populations)
 export(loadfast)
-export(normalized_exp_pctl)
+export(normalize_gem)
 export(scID_weight)
 export(scid_match_cells)
