@@ -20,20 +20,14 @@ devtools::install_github("BatadaLab/scID")
 scID input should be a TPM-normalised Gene Expression Matrix and a list of genes that describe the population of interest. Both datasets can be read from files or given as ready R objects (matrix/data.frame/list). 
 
 ## Tutorial
-This tutorial is an example pipeline for mapping across two 10X datasets of E18 mouse brain cells and nuclei from cortex, hippocampus and subverticular zone. The raw counts for the reference and the target data can be found [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/neuron_9k) and [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/nuclei_900) respectively. 
+This tutorial is an example pipeline for mapping across two 10X datasets of E18 mouse brain cells and nuclei from cortex, hippocampus and subverticular zone. The raw counts for the reference and the target data can be found [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/neuron_9k) and [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/nuclei_900) respectively. However, here we provide the TPM normalized values to speed-up preprocessing.
 
+After loading the libraries we read the files
+```
+library(scID)
+library(Seurat)
+```
 
-* For providing datasets already loaded on R environment:
-```
-scID_output <- scid_match_cells(signature_genes = signature_list, gem = GEM_dataframe)
-```
-
-* Output consists of three objects; the selected matching cells, a list of matching scores for all cells of the dataset, a list of gene weights generated during the sorting step.
-```
-matching_cells <- scID_output$matches
-matching_scores <- scID_output$matchingScore
-gene_weights <- scID_output$gene.weights
-```
 
 
 
