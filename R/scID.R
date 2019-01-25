@@ -75,7 +75,7 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
     signature <- names(weights[[celltype]])
     weighted_gem <- weights[[celltype]] * target_gem_norm[signature, ]
     score <- colSums(weighted_gem)/sum(weights[[celltype]])
-    matches <- final_populations(score, likelihood_threshold)
+  matches <- final_populations(score, likelihood_threshold)
     scores[celltype, matches] <- scale(score[matches])
   }
   
@@ -96,5 +96,4 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   # return result
   return(labels)
     
-  }
 }

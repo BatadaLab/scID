@@ -4,34 +4,25 @@
 \alias{scid_match_cells}
 \title{Main function to get Gene expression matrix and signature genes and return matches and scores}
 \usage{
-scid_match_cells(signature_file = NULL, gem_file = NULL, gem = NULL,
-  signature_genes = NULL, contamination = 0, sort.signature = TRUE,
-  gene.weights = NULL)
+scid_match_cells(target_gem = NULL, reference_gem = NULL,
+  reference_clusters = NULL, logFC = 0.5,
+  use_reference_for_weights = FALSE, likelihood_threshold = 0.99)
 }
 \arguments{
-\item{signature_file}{(optional) filename of the signature genes}
+\item{target_gem}{Data frame of gene expression (rows) per cell (columns) in target data}
 
-\item{gem_file}{(optional) filename of the gene expression matrix}
+\item{reference_gem}{Data frame of gene expression (rows) per cell (columns) in reference data}
 
-\item{gem}{(optional) Data frame of gene expression (rows) per cell (columns)
-either gem_file or gem must be given as input}
+\item{reference_clusters}{Named list of cluster IDs of reference cells}
 
-\item{signature_genes}{(optional) a list of the signature genes
-either signature_file or signature_genes must be given as input}
+\item{logFC}{LogFC threshold for extracting markers from reference clusters}
 
-\item{contamination}{Percentage of accepted cells that belong to the common area between 
-IN and OUT population distributions}
+\item{use_reference_for_weights}{Logical to use either reference or target data for sorting the signature genes}
 
-\item{do.imputation}{Logical to choose not to correct for dropouts (default is TRUE for doing imputation)}
-
-\item{gene.weigts}{list of weights for the signature genes if known}
+\item{likelihood_threshold}{Minimum required likelihood of gene signature score for a cell to be assigned to the respective reference cluster}
 }
 \value{
-list of names of matching cells (IN-population) and
-
-matching score of every cell of the dataset
-
-list of weight per gene
+list of target cluster IDs
 }
 \description{
 Main function to get Gene expression matrix and signature genes and return matches and scores
