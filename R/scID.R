@@ -1,75 +1,100 @@
 #' Main function to get Gene expression matrix and signature genes and return matches and scores
-#' @param signature_file (optional) filename of the signature genes
-#' @param signature_genes (optional) a list of the signature genes
-#' either signature_file or signature_genes must be given as input
-#' @param gem_file (optional) filename of the gene expression matrix
-#' @param gem (optional) Data frame of gene expression (rows) per cell (columns)
-#' either gem_file or gem must be given as input
-#' @param contamination Percentage of accepted cells that belong to the common area between 
-#' IN and OUT population distributions
-#' @param do.imputation Logical to choose not to correct for dropouts (default is TRUE for doing imputation)
-#' @param gene.weigts list of weights for the signature genes if known
-#' @return list of names of matching cells (IN-population) and 
-#' @return matching score of every cell of the dataset
-#' @return list of weight per gene
+#' @param target_gem Data frame of gene expression (rows) per cell (columns) in target data
+#' @param reference_gem Data frame of gene expression (rows) per cell (columns) in reference data
+#' @param reference_clusters Named list of cluster IDs of reference cells
+#' @param logFC LogFC threshold for extracting markers from reference clusters
+#' @param use_reference_for_weights Logical to use either reference or target data for sorting the signature genes
+#' @param likelihood_threshold Minimum required likelihood of gene signature score for a cell to be assigned to the respective reference cluster
+#' @return list of target cluster IDs
 #' @export
-scid_match_cells <- function(signature_file=NULL, gem_file=NULL, gem=NULL, signature_genes=NULL, 
-                             contamination=0, sort.signature = TRUE, gene.weights=NULL) {
+scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_clusters = NULL, 
+                             logFC = 0.5, use_reference_for_weights = FALSE, likelihood_threshold = 0.99){
   
   #----------------------------------------------------------------------------------------------------
-  # Read data
-  if (is.null(gem)) {
-    print("Reading data")
-    gem <- loadfast(gem_file)
-  }
-  if (is.null(signature_genes)) {
-    print("Reading signature genes")
-    signature_genes <- read.table(signature_file, stringsAsFactors = FALSE)$V1
-  }
-  
-  # Make rownames and signature upper case
-  rownames(gem) <- toupper(rownames(gem))
-  signature_genes <- toupper(signature_genes)
-  
-  # Keep only genes in scData
-  signature_genes <- intersect(signature_genes, rownames(gem))
-  
-  #----------------------------------------------------------------------------------------------------
-  # Find score for signature genes
-  # Calculate specificity
-  if (length(signature_genes) == 0) {
-    print("No gene from the signature is present in the GEM. Please check the given gene list.")
-    return(list(matches=NULL, matchingScore=rep(NA, ncol(gem))))
-  } else if (length(signature_genes) ==  1) {
-    print("Only one gene from the given gene list is present in the GEM. Please check the given list.")
-    return(list(matches=NULL, matchingScore=rep(NA, ncol(gem))))
+  # Check all reference cells have a cluster ID
+  common_cells <- intersect(names(reference_clusters), colnames(reference_gem))
+  if (length(common_cells) == 0) {
+    print("None  of the reference cell has a cluster ID. Please check the reference_clusters list provided.")
+    return()
   } else {
-    # normalize to 0,1 
-    gem_norm <- t(apply(gem[signature_genes, ], 1, function(x) normalize_gem(x)))
-    na.values <- which(apply(gem_norm, 1, function(x){any(is.na(x))}))
+    reference_gem <- reference_gem[, common_cells]
+    reference_clusters <- reference_clusters[common_cells]
+  }
+  # Find signature genes from reference data
+  so_ref <- Seurat::CreateSeuratObject(raw.data = reference_gem)
+  so_ref <- Seurat::NormalizeData(so_ref)
+  so_ref <- Seurat::ScaleData(so_ref)
+  so_ref@ident <- as.factor(reference_clusters)
+  
+  markers <- Seurat::FindAllMarkers(so_ref, test.use = "MAST", only.pos = TRUE, logfc.threshold = logFC)
+  
+  # Filter out signature genes that are not present in the target data
+  markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
+  
+  celltypes <- unique(markers$cluster)
+  
+  #----------------------------------------------------------------------------------------------------
+  # Min-max normalization of target gem
+  target_gem_norm <- t(apply(target_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
+  na.values <- which(apply(target_gem_norm, 1, function(x){any(is.na(x))}))
+  if (length(na.values > 0)) {
+    target_gem_norm <- target_gem_norm[-na.values, ]
+  }
+  
+  #----------------------------------------------------------------------------------------------------
+  # Weight signature genes
+  weights <- list()
+  if (use_reference_for_weights) {
+    #Min-max normalization of reference gem
+    ref_gem_norm <-  t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
+    na.values <- which(apply(ref_gem_norm, 1, function(x){any(is.na(x))}))
     if (length(na.values > 0)) {
-      gem_norm <- gem_norm[-na.values, ]
+      ref_gem_norm <- ref_gem_norm[-na.values, ]
     }
-    
-    if (is.null(gene.weights)) {
-      putative_groups <- choose_unsupervised(gem, signature_genes)
-      gene.weights <- scID_weight(gem_norm, putative_groups$in_pop, putative_groups$out_pop)
+    for (celltype in celltypes) {
+      signature_genes <- markers$gene[which(markers$cluster == celltype)]
+      IN <- names(which(reference_clusters == celltype))
+      OUT <- setdiff(colnames(reference_gem), IN)
+      gene.weights <- scID_weight(ref_gem_norm, IN, OUT)
+      weights[[celltype]] <- gene.weights
     }
-    
-    weighted_gem <- gene.weights[rownames(gem_norm)] * gem_norm
-    
-    score <- colSums(weighted_gem)/sum(gene.weights[rownames(gem_norm)])
-    
-    if (is.null(gene.weights)) {
-      #lambda_est <- c(length(putative_groups$out_pop)/ncol(gem), length(putative_groups$in_pop)/ncol(gem))
-      #mean_est <- c(mean(score[putative_groups$out_pop]), mean(score[putative_groups$in_pop]))
-      #sd_est <- c(sd(score[putative_groups$out_pop]), sd(score[putative_groups$in_pop]))
-      matches <- final_populations(score, contamination)#, lambda_est, mean_est, sd_est)
+  } else {
+    for (celltype in celltypes) {
+      signature_genes <- markers$gene[which(markers$cluster == celltype)]
+      putative_groups <- choose_unsupervised(target_gem, signature_genes)
+      gene.weights <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
+      weights[[celltype]] <- gene.weights
+    }
+  }
+  
+  #----------------------------------------------------------------------------------------------------
+  # Find scores and putative matches
+  scores <- data.frame(matrix(NA, length(celltypes), ncol(target_gem)), row.names = celltypes)
+  colnames(scores) <- colnames(target_gem)
+  for (celltype in celltypes) {
+    signature <- names(weights[[celltype]])
+    weighted_gem <- weights[[celltype]] * target_gem_norm[signature, ]
+    score <- colSums(weighted_gem)/sum(weights[[celltype]])
+    matches <- final_populations(score, likelihood_threshold)
+    scores[celltype, matches] <- scale(score[matches])
+  }
+  
+  # Resolve multiclass assignments
+  labels <- c()
+  for (cell in colnames(scores)) {
+    if (all(is.na(scores[, cell]))) {
+      matching_type <- "unassigned"
     } else {
-      matches <- final_populations(score, contamination)
+      matching_type <- rownames(scores)[which(scores[, cell] == max(scores[, cell], na.rm = T))]
     }
-    
-    return(list(matches=matches, matchingScore=score, weights=gene.weights))
+    labels <- c(labels, matching_type)
+  }
+  names(labels) <- colnames(scores)
+  table(labels)
+
+  #----------------------------------------------------------------------------------------------------
+  # return result
+  return(labels)
     
   }
 }

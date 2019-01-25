@@ -47,7 +47,8 @@ scID_weight <- function(gem, true_cells, false_cells) {
   for (gene in rownames(gem)) {
     numerator <- mean(as.numeric(gem[gene, true_cells])) - mean(as.numeric(gem[gene, false_cells]))
     denominator <- sd(as.numeric(gem[gene, false_cells]))^2 + sd(as.numeric(gem[gene, true_cells]))^2
-    weights[gene] <- max(numerator/denominator, 0)
+    #weights[gene] <- max(numerator/denominator, 0)
+    weights[gene] <- numerator/denominator
   }
   
   weights[which(is.na(weights))] <- 0
