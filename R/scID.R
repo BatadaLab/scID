@@ -22,13 +22,6 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
     reference_clusters <- reference_clusters[common_cells]
   }
   
-  # Min-max normalization of target gem
-  target_gem_norm <- t(apply(target_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
-  na.values <- which(apply(target_gem_norm, 1, function(x){any(is.na(x))}))
-  if (length(na.values > 0)) {
-    target_gem_norm <- target_gem_norm[-na.values, ]
-  }
-  
   #----------------------------------------------------------------------------------------------------
   print("Stage 1: extract signatures genes from reference clusters")
   
@@ -44,6 +37,13 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
   
   celltypes <- unique(markers$cluster)
+  
+  # Min-max normalization of target gem
+  target_gem_norm <- t(apply(target_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
+  na.values <- which(apply(target_gem_norm, 1, function(x){any(is.na(x))}))
+  if (length(na.values > 0)) {
+    target_gem_norm <- target_gem_norm[-na.values, ]
+  }
   
   #----------------------------------------------------------------------------------------------------
   # Stage 2: Weight signature genes
