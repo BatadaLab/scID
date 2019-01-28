@@ -22,22 +22,89 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
     reference_clusters <- reference_clusters[common_cells]
   }
   
-  #----------------------------------------------------------------------------------------------------
+  # ----------------------------------------------------------------------------------------------------
+  # Stage 1: Find signature genes from reference data
   print("Stage 1: extract signatures genes from reference clusters")
   
-  # Stage 1: Find signature genes from reference data
   so_ref <- Seurat::CreateSeuratObject(raw.data = reference_gem)
   so_ref <- Seurat::NormalizeData(so_ref)
   so_ref <- Seurat::ScaleData(so_ref)
   so_ref@ident <- as.factor(reference_clusters)
-  
+
   markers <- suppressMessages(Seurat::FindAllMarkers(so_ref, test.use = "MAST", only.pos = TRUE, logfc.threshold = logFC))
-  
+
   # Filter out signature genes that are not present in the target data
   markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
   
   celltypes <- unique(markers$cluster)
   
+  # ----------------------------------------------------------------------------------------------------
+  # Assess markers with self-mapping
+  print("Assessing quality of extracted markers")
+  # ref_cells_sbst <- c()
+  # for (celltype in celltypes) {
+  #   ref_cells_sbst <- c(ref_cells_sbst, sample(Seurat::WhichCells(so_ref, celltype), round(0.2 * length(Seurat::WhichCells(so_ref, celltype)))))
+  # }
+  # ref_subset <- reference_gem[, ref_cells_sbst]
+  
+  weights <- list()
+  # Min-max normalization of reference gem
+  ref_gem_norm <-  t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
+  na.values <- which(apply(ref_gem_norm, 1, function(x){any(is.na(x))}))
+  if (length(na.values > 0)) {
+    ref_gem_norm <- ref_gem_norm[-na.values, ]
+  }
+  
+  for (i in 1:length(celltypes)) {
+    svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
+    Sys.sleep(0.01)
+    signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
+    IN <- intersect(names(which(reference_clusters == celltypes[i])), colnames(ref_gem_norm))
+    OUT <- setdiff(colnames(ref_gem_norm), IN)
+    gene.weights <- scID_weight(ref_gem_norm, IN, OUT)
+    weights[[celltypes[i]]] <- gene.weights
+    if (i==length(celltypes)) cat("Done!")
+  }
+  
+  scores <- data.frame(matrix(NA, length(celltypes), ncol(ref_gem_norm)), row.names = celltypes)
+  colnames(scores) <- colnames(ref_gem_norm)
+  for (i in 1:length(celltypes)) {
+    celltype <- celltypes[i]
+    svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
+    Sys.sleep(0.01)
+    signature <- names(weights[[celltype]])
+    weighted_gem <- weights[[celltype]] * ref_gem_norm[signature, ]
+    score <- colSums(weighted_gem)/sum(weights[[celltype]])
+    matches <- final_populations(score, likelihood_threshold) # NEED TO SUPPRESS THE MESSAGE
+    scores[as.character(celltype), matches] <- scale(score[matches])
+    if (i==length(celltypes)) cat("Done!")
+  }
+  
+  labels <- c()
+  for (i in 1:ncol(scores)) {
+    svMisc::progress(i*100/ncol(scores), max.value = 100, char = "-", progress.bar = T)
+    Sys.sleep(0.01)
+    cell <- colnames(scores)[i]
+    if (all(is.na(scores[, cell]))) {
+      matching_type <- "unassigned"
+    } else {
+      matching_type <- rownames(scores)[which(scores[, cell] == max(scores[, cell], na.rm = T))]
+    }
+    labels <- c(labels, matching_type)
+    if (i==ncol(scores)) cat("Done!")
+  }
+  names(labels) <- colnames(scores)
+  
+  ARI <- mclust::adjustedRandIndex(labels, so_ref@ident[names(labels)])
+  
+  if (ARI < 0.5) {
+    print("scID could not extract discriminative markers from reference clusters provided. Please try again with different clusters or logFC threshold.")
+    return()
+  } else {
+    print(paste("ARI of self-mapping is ", ARI, sep = ""))
+  }
+
+  # ----------------------------------------------------------------------------------------------------
   # Min-max normalization of target gem
   target_gem_norm <- t(apply(target_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
   na.values <- which(apply(target_gem_norm, 1, function(x){any(is.na(x))}))
@@ -45,14 +112,14 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
     target_gem_norm <- target_gem_norm[-na.values, ]
   }
   
-  #----------------------------------------------------------------------------------------------------
+  # ----------------------------------------------------------------------------------------------------
   # Stage 2: Weight signature genes
   print("Stage 2: Estimate weights of signature genes")
   
   weights <- list()
   
   if (use_reference_for_weights) {
-    #Min-max normalization of reference gem
+    # Min-max normalization of reference gem
     ref_gem_norm <-  t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
     na.values <- which(apply(ref_gem_norm, 1, function(x){any(is.na(x))}))
     if (length(na.values > 0)) {
@@ -73,12 +140,12 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
     
   } else {
     for (i in 1:length(celltypes)) {
-      svMisc::progress(i*100/length(celltypes), max.value = 100, char = "%")
-      Sys.sleep(0.01)
       signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
       putative_groups <- choose_unsupervised(target_gem, signature_genes)
       gene.weights <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
       weights[[celltypes[i]]] <- gene.weights
+      svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
+      Sys.sleep(0.01)
       if (i==length(celltypes)) cat("Done!")
     }
   }
@@ -92,14 +159,14 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   colnames(scores) <- colnames(target_gem)
   
   for (i in 1:length(celltypes)) {
-    celltype <- as.integer(celltypes[i])
-    svMisc::progress(i*100/length(celltypes), max.value = 100)
+    celltype <- celltypes[i]
+    svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
     Sys.sleep(0.01)
     signature <- names(weights[[celltype]])
     weighted_gem <- weights[[celltype]] * target_gem_norm[signature, ]
     score <- colSums(weighted_gem)/sum(weights[[celltype]])
     matches <- final_populations(score, likelihood_threshold) # NEED TO SUPPRESS THE MESSAGE
-    scores[celltype, matches] <- scale(score[matches])
+    scores[as.character(celltype), matches] <- scale(score[matches])
     if (i==length(celltypes)) cat("Done!")
   }
   
@@ -107,7 +174,7 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   print ("Stage 3.3: Resolve multiclass assignments")
   labels <- c()
   for (i in 1:ncol(scores)) {
-    svMisc::progress(i*100/ncol(scores), max.value = 100)
+    svMisc::progress(i*100/ncol(scores), max.value = 100, char = "-", progress.bar = T)
     Sys.sleep(0.01)
     cell <- colnames(scores)[i]
     if (all(is.na(scores[, cell]))) {
@@ -119,7 +186,6 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
     if (i==ncol(scores)) cat("Done!")
   }
   names(labels) <- colnames(scores)
-  table(labels)
 
   # return result
   return(labels)
