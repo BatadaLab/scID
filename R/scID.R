@@ -38,71 +38,71 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   
   celltypes <- unique(markers$cluster)
   
-  # ----------------------------------------------------------------------------------------------------
-  # Assess markers with self-mapping
-  print("Assessing quality of extracted markers")
-  # ref_cells_sbst <- c()
-  # for (celltype in celltypes) {
-  #   ref_cells_sbst <- c(ref_cells_sbst, sample(Seurat::WhichCells(so_ref, celltype), round(0.2 * length(Seurat::WhichCells(so_ref, celltype)))))
+  # # ----------------------------------------------------------------------------------------------------
+  # # Assess markers with self-mapping
+  # print("Assessing quality of extracted markers")
+  # # ref_cells_sbst <- c()
+  # # for (celltype in celltypes) {
+  # #   ref_cells_sbst <- c(ref_cells_sbst, sample(Seurat::WhichCells(so_ref, celltype), round(0.2 * length(Seurat::WhichCells(so_ref, celltype)))))
+  # # }
+  # # ref_subset <- reference_gem[, ref_cells_sbst]
+  # 
+  # weights <- list()
+  # # Min-max normalization of reference gem
+  # ref_gem_norm <-  t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
+  # na.values <- which(apply(ref_gem_norm, 1, function(x){any(is.na(x))}))
+  # if (length(na.values > 0)) {
+  #   ref_gem_norm <- ref_gem_norm[-na.values, ]
   # }
-  # ref_subset <- reference_gem[, ref_cells_sbst]
-  
-  weights <- list()
-  # Min-max normalization of reference gem
-  ref_gem_norm <-  t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
-  na.values <- which(apply(ref_gem_norm, 1, function(x){any(is.na(x))}))
-  if (length(na.values > 0)) {
-    ref_gem_norm <- ref_gem_norm[-na.values, ]
-  }
-  
-  for (i in 1:length(celltypes)) {
-    svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
-    Sys.sleep(0.01)
-    signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
-    IN <- intersect(names(which(reference_clusters == celltypes[i])), colnames(ref_gem_norm))
-    OUT <- setdiff(colnames(ref_gem_norm), IN)
-    gene.weights <- scID_weight(ref_gem_norm, IN, OUT)
-    weights[[celltypes[i]]] <- gene.weights
-    if (i==length(celltypes)) cat("Done!")
-  }
-  
-  scores <- data.frame(matrix(NA, length(celltypes), ncol(ref_gem_norm)), row.names = celltypes)
-  colnames(scores) <- colnames(ref_gem_norm)
-  for (i in 1:length(celltypes)) {
-    celltype <- celltypes[i]
-    svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
-    Sys.sleep(0.01)
-    signature <- names(weights[[celltype]])
-    weighted_gem <- weights[[celltype]] * ref_gem_norm[signature, ]
-    score <- colSums(weighted_gem)/sum(weights[[celltype]])
-    matches <- final_populations(score, likelihood_threshold) # NEED TO SUPPRESS THE MESSAGE
-    scores[as.character(celltype), matches] <- scale(score[matches])
-    if (i==length(celltypes)) cat("Done!")
-  }
-  
-  labels <- c()
-  for (i in 1:ncol(scores)) {
-    svMisc::progress(i*100/ncol(scores), max.value = 100, char = "-", progress.bar = T)
-    Sys.sleep(0.01)
-    cell <- colnames(scores)[i]
-    if (all(is.na(scores[, cell]))) {
-      matching_type <- "unassigned"
-    } else {
-      matching_type <- rownames(scores)[which(scores[, cell] == max(scores[, cell], na.rm = T))]
-    }
-    labels <- c(labels, matching_type)
-    if (i==ncol(scores)) cat("Done!")
-  }
-  names(labels) <- colnames(scores)
-  
-  ARI <- mclust::adjustedRandIndex(labels, so_ref@ident[names(labels)])
-  
-  if (ARI < 0.5) {
-    print("scID could not extract discriminative markers from reference clusters provided. Please try again with different clusters or logFC threshold.")
-    return()
-  } else {
-    print(paste("ARI of self-mapping is ", ARI, sep = ""))
-  }
+  # 
+  # for (i in 1:length(celltypes)) {
+  #   svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
+  #   Sys.sleep(0.01)
+  #   signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
+  #   IN <- intersect(names(which(reference_clusters == celltypes[i])), colnames(ref_gem_norm))
+  #   OUT <- setdiff(colnames(ref_gem_norm), IN)
+  #   gene.weights <- scID_weight(ref_gem_norm, IN, OUT)
+  #   weights[[celltypes[i]]] <- gene.weights
+  #   if (i==length(celltypes)) cat("Done!")
+  # }
+  # 
+  # scores <- data.frame(matrix(NA, length(celltypes), ncol(ref_gem_norm)), row.names = celltypes)
+  # colnames(scores) <- colnames(ref_gem_norm)
+  # for (i in 1:length(celltypes)) {
+  #   celltype <- celltypes[i]
+  #   svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
+  #   Sys.sleep(0.01)
+  #   signature <- names(weights[[celltype]])
+  #   weighted_gem <- weights[[celltype]] * ref_gem_norm[signature, ]
+  #   score <- colSums(weighted_gem)/sum(weights[[celltype]])
+  #   matches <- final_populations(score, likelihood_threshold) # NEED TO SUPPRESS THE MESSAGE
+  #   scores[as.character(celltype), matches] <- scale(score[matches])
+  #   if (i==length(celltypes)) cat("Done!")
+  # }
+  # 
+  # labels <- c()
+  # for (i in 1:ncol(scores)) {
+  #   svMisc::progress(i*100/ncol(scores), max.value = 100, char = "-", progress.bar = T)
+  #   Sys.sleep(0.01)
+  #   cell <- colnames(scores)[i]
+  #   if (all(is.na(scores[, cell]))) {
+  #     matching_type <- "unassigned"
+  #   } else {
+  #     matching_type <- rownames(scores)[which(scores[, cell] == max(scores[, cell], na.rm = T))]
+  #   }
+  #   labels <- c(labels, matching_type)
+  #   if (i==ncol(scores)) cat("Done!")
+  # }
+  # names(labels) <- colnames(scores)
+  # 
+  # ARI <- mclust::adjustedRandIndex(labels, so_ref@ident[names(labels)])
+  # 
+  # if (ARI < 0.5) {
+  #   print("scID could not extract discriminative markers from reference clusters provided. Please try again with different clusters or logFC threshold.")
+  #   return()
+  # } else {
+  #   print(paste("ARI of self-mapping is ", ARI, sep = ""))
+  # }
 
   # ----------------------------------------------------------------------------------------------------
   # Min-max normalization of target gem
