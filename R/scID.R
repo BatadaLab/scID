@@ -56,14 +56,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
     # ----------------------------------------------------------------------------------------------------
     # Stage 1: Find signature genes from reference data
     print("Stage 1: extract signatures genes from reference clusters")
-    
-    so_ref <- Seurat::CreateSeuratObject(raw.data = reference_gem)
-    so_ref <- Seurat::NormalizeData(so_ref)
-    so_ref <- Seurat::ScaleData(so_ref)
-    so_ref@ident <- as.factor(reference_clusters)
-    
-    markers <- suppressMessages(Seurat::FindAllMarkers(so_ref, test.use = "MAST", only.pos = TRUE, logfc.threshold = logFC))
-    
+    markers <- find_markers(reference_gem, reference_clusters, logFC)
     # Filter out signature genes that are not present in the target data
     markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
     celltypes <- unique(markers$cluster)

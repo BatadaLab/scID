@@ -2,6 +2,7 @@
 
 export(choose_unsupervised)
 export(final_populations)
+export(find_markers)
 export(loadfast)
 export(normalize_gem)
 export(scID_weight)
