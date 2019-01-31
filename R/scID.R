@@ -19,17 +19,17 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   # Reference
   # Check if one of reference data (gem and labels) or markers have been given
   if (is.null(reference_gem) && is.null(reference_clusters) && is.null(markers)) {
-    print("Please provide either clustered reference data or list of markers for each reference cluster")
+    message("Please provide either clustered reference data or list of markers for each reference cluster")
     return()
   } else if (is.null(markers)) {
     # Check all reference cells have labels
     if (is.null(reference_clusters)) {
-      print("None of the reference cells has a cluster ID. Please check the reference_clusters list provided.")
+      message("None of the reference cells has a cluster ID. Please check the reference_clusters list provided.")
       return()
     } else {
       common_cells <- intersect(names(reference_clusters), colnames(reference_gem))
       if (length(common_cells) == 0) {
-        print("None of the reference cells has a cluster ID. Please check the reference_clusters list provided.")
+        message("None of the reference cells has a cluster ID. Please check the reference_clusters list provided.")
         return()
       } else {
         reference_gem <- reference_gem[, common_cells]
@@ -40,11 +40,11 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   } else {
     # Check markers have gene and cluster columns
     if (length(intersect(c("gene", "cluster"), colnames(markers))) !=2 ) {
-      print("Please provide a data frame of markers with gene and cluster in columns")
+      message("Please provide a data frame of markers with gene and cluster in columns")
       return() 
     }
     if (!"gene" %in% colnames(markers)) {
-      print("Please provide a data frame of markers with gene and cluster in columns")
+      message("Please provide a data frame of markers with gene and cluster in columns")
       return()  
     } else {
       markers$gene <- toupper(markers$gene)
@@ -59,7 +59,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   if (is.null(markers)) {
     # ----------------------------------------------------------------------------------------------------
     # Stage 1: Find signature genes from reference data
-    print("Stage 1: extract signatures genes from reference clusters")
+    message("Stage 1: extract signatures genes from reference clusters")
     markers <- find_markers(reference_gem, reference_clusters, logFC)
     # Filter out signature genes that are not present in the target data
     markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
@@ -80,7 +80,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   
   # ----------------------------------------------------------------------------------------------------
   # Stage 2: Weight signature genes
-  print("Stage 2: Estimate weights of signature genes")
+  message("Stage 2: Estimate weights of signature genes")
   
   weights <- list()
   
@@ -97,7 +97,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   #----------------------------------------------------------------------------------------------------
   # Stage 3
   # Find scores and putative matches
-  print("Stage 3.1-2: Calculate scores and find matching cells")
+  message("Stage 3.1-2: Calculate scores and find matching cells")
   
   scores <- data.frame(matrix(NA, length(celltypes), ncol(target_gem)), row.names = celltypes)
   colnames(scores) <- colnames(target_gem)
