@@ -1,10 +1,12 @@
 #' @export
 make_heatmap <- function(gem, labels, markers) {
   
-  celltypes <- unique(markers$cluster)
-  
+  rownames(gem) <- toupper(rownames(gem))
+
   # Keep markers present in gem
   markers <- markers[which(markers$gene %in% rownames(gem)), ]
+  
+  celltypes <- unique(markers$cluster)
   
   gem_avg <- matrix(NA, length(celltypes), length(celltypes))
   for (i in 1:length(celltypes)) {
