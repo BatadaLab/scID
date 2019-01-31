@@ -1,9 +1,6 @@
 # scID
 
-The power of single cell RNA sequencing (scRNA-seq) stems from its ability to uncover cell type-dependent phenotypes, which rests on the accuracy of cell type identification. However, resolving cell types within and, thus, comparison of scRNA-seq data across conditions is challenging due to technical factors such as sparsity, low number of cells and batch effect. To address these challenges we developed scID (Single Cell IDentification), which uses the framework of Fisher's Linear Discriminant Analysis to identify transcriptionally related cell types between scRNA-seq datasets. We demonstrate the accuracy and performance of scID relative to existing methods on several published datasets. By increasing power to identify transcriptionally similar cell types across datasets, scID enhances investigator's ability to extract biological insights from scRNA-seq data.
-
-## How scID works
-scID uses Linear Discriminant Analysis approach described in the preprint "" link
+The power of single cell RNA sequencing (scRNA-seq) stems from its ability to uncover cell type-dependent phenotypes, which rests on the accuracy of cell type identification. However, resolving cell types within and, thus, comparison of scRNA-seq data across conditions is challenging due to technical factors such as sparsity, low number of cells and batch effect. To address these challenges we developed scID (Single Cell IDentification), which uses the framework of Fisher's Linear Discriminant Analysis to identify transcriptionally related cell types between scRNA-seq datasets. We demonstrate in the preprinr [] the accuracy and performance of scID relative to existing methods on several published datasets. By increasing power to identify transcriptionally similar cell types across datasets, scID enhances investigator's ability to extract biological insights from scRNA-seq data.
 
 ## Installation
 scID can be installed using the devtools R package:
@@ -12,19 +9,19 @@ devtools::install_github("BatadaLab/scID")
 ```
 
 ## Usage
+Given two datasets of single-cell RNA-seq gene expression for which cell grouping for one the datasets (reference) is known, scID seeks to find transcriptionally equivalent groups of cells for the second dataset (target).
 ```
-scid_match_cells(target_gem=T, reference_gem=R, reference_clusters=L, ...)
+scid_match_cells(target_gem, reference_gem, reference_clusters, ...)
 ```
 
 ### Input
-scID requires the following inputs:
-1. A data frame of TPM-normalised gene (rows) expression in cells (columns) of the target data (R)
-2. A data frame of TPM-normalised gene (rows) expression in cells (columns) of the reference data (T) and a list of cluster IDs for the reference cells or alternatively (L), 
-3. A data frame of signature genes per reference cluster. This has to have columns named "gene" and "cluster" for the gene symbols and cluster IDs for which each gene is a marker.
+1. ```target_gem``` An nxm data frame of n genes (rows) in m cells (columns) of the dataset with unknown grouping, where each entry is library-depth or column normalized gene expression.
+2. ```reference_gem``` An NxM data frame of N genes (rows) in M cells (columns) of the dataset with known grouping, where each entry is library-depth or column normalized gene expression.
+3. ```reference_clusters``` A list of cluster labels for the reference cells.
 
 ### Output
-1. A list of labels for the target cells
-2. A data frame of signature genes per reference cluster.
+1. ```labels``` A list of cluster labels for the target cells
+2. ```markers``` A data frame of signature genes extracted from the reference clusters.
 
 ## Tutorial
 This tutorial is an example pipeline for mapping across two 10X datasets of E18 mouse brain cells and nuclei from cortex, hippocampus and subverticular zone. The raw counts for the reference and the target data can be found [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/neuron_9k) and [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/nuclei_900) respectively. However, here we provide the TPM normalized values to speed-up preprocessing.
