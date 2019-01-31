@@ -61,7 +61,7 @@ make_heatmap(gem = target_gem, labels = scID_res$labels, markers = markers)
 ```
 ![](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Target_heatmap.png)
 
-Here we can see that the gene expression pattern in the target data is very similar to the one in the reference data. The gray column shows that no target cell was assigned to the reference "Cluster 3".
+Here we can see that the gene expression pattern in the target data is very similar to the one in the reference data. The gray column shows that no target cell were assigned to the reference clusters 5 and 13.
 
 
 
