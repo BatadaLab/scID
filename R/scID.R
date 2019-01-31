@@ -12,7 +12,6 @@
 scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clusters=NULL, 
                              logFC=0.5, use_reference_for_weights=FALSE, likelihood_threshold=0.99, 
                              markers=NULL) {
-  
   #----------------------------------------------------------------------------------------------------
   # Data preprocessing
   
@@ -77,7 +76,6 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
     target_gem_norm <- target_gem_norm[-na.values, ]
   }
   
-  
   # ----------------------------------------------------------------------------------------------------
   # Stage 2: Weight signature genes
   message("Stage 2: Estimate weights of signature genes")
@@ -85,8 +83,8 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   weights <- list()
   
   for (i in 1:length(celltypes)) {
-    svMisc::progress(i*100/length(celltypes), max.value = 100, progress.bar = T)
-    Sys.sleep(0.01)
+    svMisc::progress(i*100/length(celltypes))
+    Sys.sleep(1 / length(celltypes))
     signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
     putative_groups <- choose_unsupervised(target_gem[markers$gene, ], signature_genes)
     gene.weights <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
@@ -104,19 +102,22 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   
   for (i in 1:length(celltypes)) {
     celltype <- celltypes[i]
-    svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
-    Sys.sleep(0.01)
+    # Remove progress because it is overlapping with mixtools messages
+    # svMisc::progress(i*100/length(celltypes))
+    # Sys.sleep(1/length(celltypes))
     signature <- names(weights[[celltype]])
     weighted_gem <- weights[[celltype]] * target_gem_norm[signature, ]
     score <- colSums(weighted_gem)/sum(weights[[celltype]])
-    
     matches <- final_populations(score, likelihood_threshold)
     scores[as.character(celltype), matches] <- scale(score[matches])
     if (i==length(celltypes)) cat("Done!")
   }
   
   scID_labels <- c()
-  for (cell in colnames(scores)) {
+  for (i in 1:ncol(scores)) {
+    cell <- colnames(scores)[i]
+    svMisc::progress(i*100/ncol(scores))
+    Sys.sleep(1/ncol(scores))
     if (all(is.na(scores[, cell]))) {
       matching_type <- "unassigned"
     } else {
