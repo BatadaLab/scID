@@ -108,7 +108,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
     Sys.sleep(0.01)
     signature <- names(weights[[celltype]])
     weighted_gem <- weights[[celltype]] * target_gem_norm[signature, ]
-    score <- colSums(weighted_gem)/sum(gene.weights[rownames(target_gem_norm)])
+    score <- colSums(weighted_gem)/sum(weights[[celltype]])
     
     matches <- final_populations(score, likelihood_threshold)
     scores[as.character(celltype), matches] <- scale(score[matches])
