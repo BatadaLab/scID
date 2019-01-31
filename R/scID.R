@@ -85,7 +85,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   weights <- list()
   
   for (i in 1:length(celltypes)) {
-    svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
+    svMisc::progress(i*100/length(celltypes), max.value = 100, progress.bar = T)
     Sys.sleep(0.01)
     signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
     putative_groups <- choose_unsupervised(target_gem[markers$gene, ], signature_genes)
@@ -108,7 +108,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
     Sys.sleep(0.01)
     signature <- names(weights[[celltype]])
     weighted_gem <- weights[[celltype]] * target_gem_norm[signature, ]
-    score <- colSums(weighted_gem)/sum(gene.weights[rownames(gem_norm)])
+    score <- colSums(weighted_gem)/sum(gene.weights[rownames(target_gem_norm)])
     
     matches <- final_populations(score, likelihood_threshold)
     scores[as.character(celltype), matches] <- scale(score[matches])
