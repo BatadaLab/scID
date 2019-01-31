@@ -9,19 +9,38 @@ devtools::install_github("BatadaLab/scID")
 ```
 
 ## Usage
+
+There are two ways to use scID. 
+
+### Canonical usage
 Given two datasets of single-cell RNA-seq gene expression for which cell grouping for one the datasets (reference) is known, scID seeks to find transcriptionally equivalent groups of cells for the second dataset (target).
 ```
 scid_match_cells(target_gem, reference_gem, reference_clusters, ...)
 ```
 
-### Input
+#### Input
 1. ```target_gem``` An nxm data frame of n genes (rows) in m cells (columns) of the dataset with unknown grouping, where each entry is library-depth or column normalized gene expression.
 2. ```reference_gem``` An NxM data frame of N genes (rows) in M cells (columns) of the dataset with known grouping, where each entry is library-depth or column normalized gene expression.
 3. ```reference_clusters``` A list of cluster labels for the reference cells.
 
-### Output
+#### Output
 1. ```labels``` A list of cluster labels for the target cells
 2. ```markers``` A data frame of signature genes extracted from the reference clusters.
+
+### Recommended usage for mutliple targets (T1, T2) and/or user-defined cluster-specific signature genes available
+
+* Step 1: Extract markers from reference clusters
+```
+markers <- find_markers(reference_gem, reference_clusters, logFC)
+```
+This step can be skipped when the user has own method for extracting markers.
+
+* Step 2: Find transctiptionally equivalent cells in target datasets
+```
+scID_for_T1 <- scid_match_cells(T1, markers, ...)
+
+scID_for_T1 <- scid_match_cells(T1, markers, ...)
+```
 
 ## Tutorial
 This tutorial is an example pipeline for mapping across two 10X datasets of E18 mouse brain cells and nuclei from cortex, hippocampus and subverticular zone. The raw counts for the reference and the target data can be found [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/neuron_9k) and [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/nuclei_900) respectively. However, here we provide the TPM normalized values to speed-up preprocessing.
