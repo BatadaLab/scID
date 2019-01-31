@@ -39,7 +39,11 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
     }
   } else {
     # Check markers have gene and cluster columns
-    if (!c("gene", "cluster") %in% colnames(markers)) {
+    if (length(intersect(c("gene", "cluster"), colnames(markers))) !=2 ) {
+      print("Please provide a data frame of markers with gene and cluster in columns")
+      return() 
+    }
+    if (!"gene" %in% colnames(markers)) {
       print("Please provide a data frame of markers with gene and cluster in columns")
       return()  
     } else {
