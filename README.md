@@ -28,7 +28,7 @@ labels <- scID::scid_match_cells(target_gem, reference_gem, reference_clusters, 
 
 2. ```markers``` A data frame of signature genes extracted from the reference clusters.
 
-### Usage 2: Single reference but multiple targets (T1, T2) and/or user-defined cluster-specific signature genes available
+### Usage 2: Single reference but multiple targets (T1, T2)
 
 * Step 1: Extract markers from reference clusters
 ```
