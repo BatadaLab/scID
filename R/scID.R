@@ -84,7 +84,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   
   if (use_reference_for_weights) {
     for (i in 1:length(celltypes)) {
-      vMisc::progress(i*100/length(celltypes))
+      svMisc::progress(i*100/length(celltypes))
       Sys.sleep(1 / length(celltypes))
       signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
       IN <- names(which(reference_labels == celltypes[i]))
