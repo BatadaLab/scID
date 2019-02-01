@@ -82,14 +82,25 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   
   weights <- list()
   
-  for (i in 1:length(celltypes)) {
-    svMisc::progress(i*100/length(celltypes))
-    Sys.sleep(1 / length(celltypes))
-    signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
-    putative_groups <- choose_unsupervised(target_gem[markers$gene, ], signature_genes)
-    gene.weights <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
-    weights[[celltypes[i]]] <- gene.weights
-    if (i==length(celltypes)) cat("Done!")
+  if (use_reference_for_weights) {
+    for (i in 1:length(celltypes)) {
+      vMisc::progress(i*100/length(celltypes))
+      Sys.sleep(1 / length(celltypes))
+      signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
+      IN <- names(which(reference_labels == celltypes[i]))
+      OUT <- setdiff(colnames(reference_gem), IN)
+      weights[[celltypes[i]]] <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
+      if (i==length(celltypes)) cat("Done!")
+    }
+  } else {
+    for (i in 1:length(celltypes)) {
+      svMisc::progress(i*100/length(celltypes))
+      Sys.sleep(1 / length(celltypes))
+      signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
+      putative_groups <- choose_unsupervised(target_gem[markers$gene, ], signature_genes)
+      weights[[celltypes[i]]] <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
+      if (i==length(celltypes)) cat("Done!")
+    }
   }
   
   #----------------------------------------------------------------------------------------------------
