@@ -24,9 +24,12 @@ scID_res <- scID::scid_match_cells(target_gem, reference_gem, reference_clusters
 3. ```reference_clusters``` A list of cluster labels for the reference cells.
 
 #### Output
-1. ```labels``` A list of cluster labels for the target cells
 
-2. ```markers``` A data frame of signature genes extracted from the reference clusters.
+scID_output is a list of two objects 
+
+1. ```scID_output$labels``` A named list of cluster labels for the target cells
+
+2. ```scID_output$markers``` A data frame of signature genes extracted from the reference clusters. 
 
 ### Usage 2: Single reference but multiple targets (T1, T2)
 
@@ -38,14 +41,14 @@ This step can be skipped when the user has own method for extracting markers.
 
 * Step 2: Find transctiptionally equivalent cells in target datasets
 ```
-scID_res_T1 <- scID:scid_match_cells(T1, markers_generated_by_scID, ...)
+scID_output_T1 <- scID:scid_match_cells(T1, markers_generated_by_scID, ...)
 
-scID_res_T2 <- scID::scid_match_cells(T2, markers_generated_by_scID, ...)
+scID_output_T2 <- scID::scid_match_cells(T2, markers_generated_by_scID, ...)
 ```
 ### Usage 3: User-specified cluster gene signatures
 A pre-computed set of markers can be given as input by the user alternatively. The markers object has to be a data frame with genes and cluster ID in columns as in [this](https://github.com/BatadaLab/scID/blob/master/ExampleData/markers.rds) example file.
 ```
-scID_res <- scID::scid_match_cells(T, markers_generated_by_user, ...)
+scID_output <- scID::scid_match_cells(T, markers_generated_by_user, ...)
 ```
 
 
