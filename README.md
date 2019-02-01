@@ -44,7 +44,7 @@ scID_res_T2 <- scID::scid_match_cells(T2, markers_generated_by_scID, ...)
 ```
 ### Usage 3: User-specified cluster gene signatures
 ```
-labels <- scID::scid_match_cells(T, markers_generated_by_user, ...)
+scID_res <- scID::scid_match_cells(T, markers_generated_by_user, ...)
 ```
 
 
