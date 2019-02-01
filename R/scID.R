@@ -34,12 +34,6 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
         reference_gem <- reference_gem[, common_cells]
         rownames(reference_gem) <- toupper(rownames(reference_gem))
         reference_clusters <- reference_clusters[common_cells]
-        
-        reference_gem_norm <- t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
-        na.values <- which(apply(reference_gem_norm, 1, function(x){any(is.na(x))}))
-        if (length(na.values > 0)) {
-          reference_gem_norm <- reference_gem_norm[-na.values, ]
-        }
       }
     }
   } else {
@@ -89,6 +83,14 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   weights <- list()
   
   if (use_reference_for_weights) {
+    if (is.null(reference_gem)) {
+      message("Reference data not available. Please provide clustered reference data or set use_reference_for_weights=FALSE.")
+    }
+    reference_gem_norm <- t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
+    na.values <- which(apply(reference_gem_norm, 1, function(x){any(is.na(x))}))
+    if (length(na.values > 0)) {
+      reference_gem_norm <- reference_gem_norm[-na.values, ]
+    }
     for (i in 1:length(celltypes)) {
       svMisc::progress(i*100/length(celltypes))
       Sys.sleep(1 / length(celltypes))
