@@ -34,6 +34,12 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
         reference_gem <- reference_gem[, common_cells]
         rownames(reference_gem) <- toupper(rownames(reference_gem))
         reference_clusters <- reference_clusters[common_cells]
+        
+        reference_gem_norm <- t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
+        na.values <- which(apply(reference_gem_norm, 1, function(x){any(is.na(x))}))
+        if (length(na.values > 0)) {
+          reference_gem_norm <- reference_gem_norm[-na.values, ]
+        }
       }
     }
   } else {
