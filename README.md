@@ -15,7 +15,7 @@ There are three ways to use scID.
 ### Usage 1: Canonical usage
 Given two datasets of single-cell RNA-seq gene expression for which cell grouping for one the datasets (reference) is known, scID seeks to find transcriptionally equivalent groups of cells for the second dataset (target).
 ```
-labels <- scID::scid_match_cells(target_gem, reference_gem, reference_clusters, ...)
+scID_res <- scID::scid_match_cells(target_gem, reference_gem, reference_clusters, ...)
 ```
 
 #### Input
@@ -34,13 +34,13 @@ labels <- scID::scid_match_cells(target_gem, reference_gem, reference_clusters, 
 ```
 markers_generated_by_scID <- scID::find_markers(reference_gem, reference_clusters, logFC)
 ```
-This step can be skipped when the user has own method for extracting markers.
+This step can be skipped when the user has own method for extracting markers. The markers object has to be a data frame with genes and cluster ID in columns as in [this](https://github.com/BatadaLab/scID/blob/master/ExampleData/markers.rds) example file.
 
 * Step 2: Find transctiptionally equivalent cells in target datasets
 ```
-labels_T1 <- scID:scid_match_cells(T1, markers_generated_by_scID, ...)
+scID_res_T1 <- scID:scid_match_cells(T1, markers_generated_by_scID, ...)
 
-labels_T2 <- scID::scid_match_cells(T2, markers_generated_by_scID, ...)
+scID_res_T2 <- scID::scid_match_cells(T2, markers_generated_by_scID, ...)
 ```
 ### Usage 3: User-specified cluster gene signatures
 ```
