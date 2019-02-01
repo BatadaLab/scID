@@ -8,8 +8,11 @@ make_heatmap <- function(gem, labels, markers) {
   
   celltypes <- unique(markers$cluster)
   
-  gem_avg <- matrix(NA, length(celltypes), length(celltypes))
-  for (i in 1:length(celltypes)) {
+  nrows <- length(celltypes)
+  ncols <- length(unique(labels))
+  
+  gem_avg <- matrix(NA, nrows, ncols)
+  for (i in 1:ncols) {
     cells <- na.omit(names(labels)[which(labels == celltypes[i])])
     if (length(cells) > 1) {
       avg_exp <- rowMeans(gem[toupper(markers$gene), cells])
@@ -19,7 +22,7 @@ make_heatmap <- function(gem, labels, markers) {
     } else {
       next
     }
-    for (j in 1:length(celltypes)) {
+    for (j in 1:nrows) {
       gem_avg[j,i] <- mean(na.omit(avg_exp[toupper(markers$gene[which(markers$cluster == celltypes[j])])]))
     }
   }
