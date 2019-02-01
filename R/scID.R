@@ -87,7 +87,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
       svMisc::progress(i*100/length(celltypes))
       Sys.sleep(1 / length(celltypes))
       signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
-      IN <- names(which(reference_labels == celltypes[i]))
+      IN <- names(which(reference_clusters == celltypes[i]))
       OUT <- setdiff(colnames(reference_gem), IN)
       weights[[celltypes[i]]] <- scID_weight(target_gem_norm[signature_genes, ], IN, OUT)
       if (i==length(celltypes)) cat("Done!")
