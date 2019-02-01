@@ -85,6 +85,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   if (use_reference_for_weights) {
     if (is.null(reference_gem)) {
       message("Reference data not available. Please provide clustered reference data or set use_reference_for_weights=FALSE.")
+      return()
     }
     reference_gem_norm <- t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
     na.values <- which(apply(reference_gem_norm, 1, function(x){any(is.na(x))}))
