@@ -6,10 +6,10 @@ make_heatmap <- function(gem, labels, markers) {
   # Keep markers present in gem
   markers <- markers[which(markers$gene %in% rownames(gem)), ]
   
-  celltypes <- unique(markers$cluster)
+  celltypes <- unique(labels)
   
-  nrows <- length(celltypes)
-  ncols <- length(unique(labels))
+  nrows <- length(unique(markers$cluster))
+  ncols <- length(celltypes)
   
   gem_avg <- matrix(NA, nrows, ncols)
   for (i in 1:ncols) {
@@ -23,11 +23,11 @@ make_heatmap <- function(gem, labels, markers) {
       next
     }
     for (j in 1:nrows) {
-      gem_avg[j,i] <- mean(na.omit(avg_exp[toupper(markers$gene[which(markers$cluster == celltypes[j])])]))
+      gem_avg[j,i] <- mean(na.omit(avg_exp[toupper(markers$gene[which(markers$cluster == unique(markers$cluster)[j])])]))
     }
   }
   
-  rownames(gem_avg) <- celltypes
+  rownames(gem_avg) <- unique(markers$cluster)
   colnames(gem_avg) <- celltypes
   
   pheatmap::pheatmap(gem_avg, border="white", #color = colorspace::diverge_hcl(50, h=c(180, 70), c=70, l=c(70, 90)), 
