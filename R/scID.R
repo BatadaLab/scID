@@ -89,7 +89,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
       signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
       IN <- names(which(reference_labels == celltypes[i]))
       OUT <- setdiff(colnames(reference_gem), IN)
-      weights[[celltypes[i]]] <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
+      weights[[celltypes[i]]] <- scID_weight(target_gem_norm[signature_genes, ], IN, OUT)
       if (i==length(celltypes)) cat("Done!")
     }
   } else {
