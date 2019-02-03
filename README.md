@@ -68,15 +68,15 @@ target_gem <- readRDS(file="~/scID/ExampleData/target_gem.rds")
 reference_gem <- readRDS(file="~/scID/ExampleData/reference_gem.rds")
 reference_clusters <- readRDS(file="~/scID/ExampleData/reference_clusters.rds")
 
-scID_res <- scid_match_cells(target_gem = target_gem, reference_gem = reference_gem, 
-                             reference_clusters = reference_clusters, logFC = 0.5, likelihood_threshold = 0.95)
+scID_output <- scid_match_cells(target_gem = target_gem, reference_gem = reference_gem, 
+                                reference_clusters = reference_clusters, logFC = 0.5, likelihood_threshold = 0.95)
 ```
 
 Alternatively, scID can take a data frame of signature genes per cluster without reference cells. This could also be curated lists of markers. 
 ```
 markers <- readRDS(file="~/scID/ExampleData/markers.rds")
 
-scID_res <- scid_match_cells(target_gem = target_gem, markers = markers, logFC = 0.5, likelihood_threshold = 0.95)
+scID_output <- scid_match_cells(target_gem = target_gem, markers = markers, logFC = 0.5, likelihood_threshold = 0.95)
 ```
 
 The next heatmap shows the average expression of each markers' list in each of the reference clusters. Each row represents a markers' list and each column a cluster of cells.
@@ -87,7 +87,7 @@ make_heatmap(gem = reference_gem, labels = reference_labels, markers = markers)
 
 The respective heatmap of target nuclei data grouped by scID can is shown below
 ```
-make_heatmap(gem = target_gem, labels = scID_res$labels, markers = markers)
+make_heatmap(gem = target_gem, labels = scID_output$labels, markers = markers)
 ```
 ![](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Target_heatmap.png)
 
