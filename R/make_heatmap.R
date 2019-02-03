@@ -27,8 +27,8 @@ make_heatmap <- function(gem, labels, markers) {
     }
   }
   
-  rownames(gem_avg) <- unique(markers$cluster)
-  colnames(gem_avg) <- celltypes
+  rownames(gem_avg) <- paste("gs", unique(markers$cluster), sep = "_")
+  colnames(gem_avg) <- paste("Cl", celltypes, sep = "_")
   
   pheatmap::pheatmap(gem_avg, border="white", #color = colorspace::diverge_hcl(50, h=c(180, 70), c=70, l=c(70, 90)), 
                      cluster_rows = F, cluster_cols = F, border_color = F, scale = "row")
