@@ -15,7 +15,7 @@ There are three ways to use scID.
 ### Usage 1: Canonical usage
 Given two datasets of single-cell RNA-seq gene expression for which cell grouping for one the datasets (reference) is known, scID seeks to find transcriptionally equivalent groups of cells for the second dataset (target).
 ```
-scID_output <- scID::scid_match_cells(target_gem, reference_gem, reference_clusters, ...)
+scID_output <- scID::scid_multiclass(target_gem, reference_gem, reference_clusters, ...)
 ```
 
 #### Input
