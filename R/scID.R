@@ -167,7 +167,7 @@ scid_singleclass <- function(target_gem=NULL, gene_signature=NULL, likelihood_th
   
   # ----------------------------------------------------------------------------------------------------
   # Min-max normalization of target gem
-  target_gem_norm <- t(apply(target_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
+  target_gem_norm <- t(apply(target_gem[gene_signature, ], 1, function(x) normalize_gem(x)))
   na.values <- which(apply(target_gem_norm, 1, function(x){any(is.na(x))}))
   if (length(na.values) > 0) {
     target_gem_norm <- target_gem_norm[-na.values, ]
@@ -177,8 +177,8 @@ scid_singleclass <- function(target_gem=NULL, gene_signature=NULL, likelihood_th
   # Stage 2: Weight signature genes
   message("Stage 2: Estimate weights of signature genes")
   
-  putative_groups <- choose_unsupervised(target_gem, signature_genes)
-  weights <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
+  putative_groups <- choose_unsupervised(target_gem, gene_signature)
+  weights <- scID_weight(target_gem_norm[gene_signature, ], putative_groups$in_pop, putative_groups$out_pop)
   
   #----------------------------------------------------------------------------------------------------
   # Stage 3
