@@ -72,7 +72,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   # Min-max normalization of target gem
   target_gem_norm <- t(apply(target_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
   na.values <- which(apply(target_gem_norm, 1, function(x){any(is.na(x))}))
-  if (length(na.values > 0)) {
+  if (length(na.values) > 0) {
     target_gem_norm <- target_gem_norm[-na.values, ]
   }
   
@@ -89,7 +89,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
     }
     reference_gem_norm <- t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
     na.values <- which(apply(reference_gem_norm, 1, function(x){any(is.na(x))}))
-    if (length(na.values > 0)) {
+    if (length(na.values) > 0) {
       reference_gem_norm <- reference_gem_norm[-na.values, ]
     }
     for (i in 1:length(celltypes)) {
