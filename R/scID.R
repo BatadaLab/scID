@@ -158,7 +158,7 @@ scid_multiclass <- function(target_gem=NULL, reference_gem=NULL, reference_clust
 #' @return list of target cells matching to the population of interest
 #' @return list of matching scores for all target cells
 #' @export
-scid_singleclass <- function(target_gem=NULL, gene_signature=NULL, likelihood_threshold=0.95) {
+scid_singleclass <- function(target_gem=NULL, gene_signature=NULL, likelihood_threshold=0.99) {
   #----------------------------------------------------------------------------------------------------
   # Data preprocessing
   
