@@ -155,7 +155,7 @@ scid_multiclass <- function(target_gem=NULL, reference_gem=NULL, reference_clust
 #' @param target_gem Data frame of gene expression (rows) per cell (columns) in target data
 #' @param gene_signature List of genes symbols enriched in the population of interest
 #' @param likelihood_threshold Minimum required likelihood of gene signature score for a cell to be assigned to the respective reference cluster
-#' @return list of cells matching to the population of interest
+#' @return list of target cells matching to the population of interest
 #' @return list of matching scores for all target cells
 #' @export
 scid_singleclass <- function(target_gem=NULL, gene_signature=NULL, likelihood_threshold=0.95) {
