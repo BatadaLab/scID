@@ -41,14 +41,14 @@ This step can be skipped when the user has own method for extracting markers.
 
 * Step 2: Find transctiptionally equivalent cells in target datasets
 ```
-scID_output_T1 <- scID:scid_match_cells(T1, markers_generated_by_scID, ...)
+scID_output_T1 <- scID:scid_multiclass(T1, markers_generated_by_scID, ...)
 
-scID_output_T2 <- scID::scid_match_cells(T2, markers_generated_by_scID, ...)
+scID_output_T2 <- scID::scid_multiclass(T2, markers_generated_by_scID, ...)
 ```
 ### Usage 3: User-specified cluster gene signatures
 A pre-computed set of markers can be given as input by the user alternatively. The markers object has to be a data frame with genes and cluster ID in columns as in [this](https://github.com/BatadaLab/scID/blob/master/ExampleData/markers.rds) example file.
 ```
-scID_output <- scID::scid_match_cells(T, markers_generated_by_user, ...)
+scID_output <- scID::scid_multiclass(T, markers_generated_by_user, ...)
 ```
 
 
@@ -68,15 +68,15 @@ target_gem <- readRDS(file="~/scID/ExampleData/target_gem.rds")
 reference_gem <- readRDS(file="~/scID/ExampleData/reference_gem.rds")
 reference_clusters <- readRDS(file="~/scID/ExampleData/reference_clusters.rds")
 
-scID_output <- scid_match_cells(target_gem = target_gem, reference_gem = reference_gem, 
-                                reference_clusters = reference_clusters, logFC = 0.5, likelihood_threshold = 0.95)
+scID_output <- scid_multiclass(target_gem = target_gem, reference_gem = reference_gem, 
+                               reference_clusters = reference_clusters, logFC = 0.5, likelihood_threshold = 0.95)
 ```
 
 Alternatively, scID can take a data frame of signature genes per cluster without reference cells. This could also be curated lists of markers. 
 ```
 markers <- readRDS(file="~/scID/ExampleData/markers.rds")
 
-scID_output <- scid_match_cells(target_gem = target_gem, markers = markers, logFC = 0.5, likelihood_threshold = 0.95)
+scID_output <- scid_multiclass(target_gem = target_gem, markers = markers, logFC = 0.5, likelihood_threshold = 0.95)
 ```
 
 The next heatmap shows the average expression of each markers' list in each of the reference clusters. Each row represents a markers' list and each column a cluster of cells.
