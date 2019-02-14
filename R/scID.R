@@ -125,7 +125,7 @@ scid_multiclass <- function(target_gem=NULL, reference_gem=NULL, reference_clust
     # Remove progress because it is overlapping with mixtools messages
     # svMisc::progress(i*100/length(celltypes))
     # Sys.sleep(1/length(celltypes))
-    signature <- names(weights[[celltype]])
+    signature <- names(weights[[as.character(celltypes[i])]])
     weighted_gem <- weights[[as.character(celltypes[i])]] * target_gem_norm[signature, ]
     score <- colSums(weighted_gem)/sum(weights[[as.character(celltypes[i])]])
     matches <- final_populations(score, likelihood_threshold)
