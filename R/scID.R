@@ -9,7 +9,7 @@
 #' @return list of labels for target cells
 #' @return table of marker genes per cluster
 #' @export
-scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clusters=NULL, 
+scid_multiclass <- function(target_gem=NULL, reference_gem=NULL, reference_clusters=NULL, 
                              logFC=0.5, use_reference_for_weights=FALSE, likelihood_threshold=0.99, 
                              markers=NULL) {
   #----------------------------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   # Min-max normalization of target gem
   target_gem_norm <- t(apply(target_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
   na.values <- which(apply(target_gem_norm, 1, function(x){any(is.na(x))}))
-  if (length(na.values > 0)) {
+  if (length(na.values) > 0) {
     target_gem_norm <- target_gem_norm[-na.values, ]
   }
   
@@ -89,7 +89,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
     }
     reference_gem_norm <- t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
     na.values <- which(apply(reference_gem_norm, 1, function(x){any(is.na(x))}))
-    if (length(na.values > 0)) {
+    if (length(na.values) > 0) {
       reference_gem_norm <- reference_gem_norm[-na.values, ]
     }
     for (i in 1:length(celltypes)) {
@@ -149,4 +149,45 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
   
   # return result
   return(list(labels=scID_labels, markers=markers))
+}
+
+#' Main function to get Gene expression matrix and signature genes and return matches and scores
+#' @param target_gem Data frame of gene expression (rows) per cell (columns) in target data
+#' @param gene_signature List of genes symbols enriched in the population of interest
+#' @param likelihood_threshold Minimum required likelihood of gene signature score for a cell to be assigned to the respective reference cluster
+#' @return list of target cells matching to the population of interest
+#' @return list of matching scores for all target cells
+#' @export
+scid_singleclass <- function(target_gem=NULL, gene_signature=NULL, likelihood_threshold=0.99) {
+  #----------------------------------------------------------------------------------------------------
+  # Data preprocessing
+  
+  rownames(target_gem) <- toupper(rownames(target_gem))
+  gene_signature <- intersect(toupper(gene_signature), rownames(target_gem))
+  
+  # ----------------------------------------------------------------------------------------------------
+  # Min-max normalization of target gem
+  target_gem_norm <- t(apply(target_gem[gene_signature, ], 1, function(x) normalize_gem(x)))
+  na.values <- which(apply(target_gem_norm, 1, function(x){any(is.na(x))}))
+  if (length(na.values) > 0) {
+    target_gem_norm <- target_gem_norm[-na.values, ]
+  }
+  
+  # ----------------------------------------------------------------------------------------------------
+  # Stage 2: Weight signature genes
+  message("Stage 2: Estimate weights of signature genes")
+  
+  putative_groups <- choose_unsupervised(target_gem, gene_signature)
+  weights <- scID_weight(target_gem_norm[gene_signature, ], putative_groups$in_pop, putative_groups$out_pop)
+  
+  #----------------------------------------------------------------------------------------------------
+  # Stage 3
+  # Find scores and putative matches
+  message("Stage 3.1-2: Calculate scores and find matching cells")
+  
+  weighted_gem <- weights * target_gem_norm[names(weights), ]
+  score <- colSums(weighted_gem)/sum(weights)
+  matches <- final_populations(score, likelihood_threshold)
+
+  return(list(scores=score, matches=matches))
 }
