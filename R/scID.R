@@ -107,7 +107,7 @@ scid_match_cells <- function(target_gem=NULL, reference_gem=NULL, reference_clus
       Sys.sleep(1 / length(celltypes))
       signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
       putative_groups <- choose_unsupervised(target_gem[markers$gene, ], signature_genes)
-      weights[[celltypes[i]]] <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
+      weights[[as.character(celltypes[i])]] <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
       if (i==length(celltypes)) cat("Done!")
     }
   }
