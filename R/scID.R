@@ -7,36 +7,57 @@
 #' @param likelihood_threshold Minimum required likelihood of gene signature score for a cell to be assigned to the respective reference cluster
 #' @return list of target cluster IDs
 #' @export
-scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_clusters = NULL, 
-                             logFC = 0.5, use_reference_for_weights = FALSE, likelihood_threshold = 0.99){
+scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_clusters = NULL, markers = NULL,
+                             logFC = 0.5, estimate_weights = FALSE, likelihood_threshold = 0.99, only_pos=FALSE){
   
   #----------------------------------------------------------------------------------------------------
   # Data pre-processing
-  # Check all reference cells have a cluster ID
-  common_cells <- intersect(names(reference_clusters), colnames(reference_gem))
-  if (length(common_cells) == 0) {
-    print("None  of the reference cells has a cluster ID. Please check the reference_clusters list provided.")
+  if (is.null(reference_gem) && is.null(reference_clusters) && is.null(markers)) {
+    message("Please provide either clustered reference data or list of markers for each reference cluster")
     return()
+  } else if (is.null(markers)) {
+    # Check all reference cells have a cluster ID
+    common_cells <- intersect(names(reference_clusters), colnames(reference_gem))
+    if (length(common_cells) == 0) {
+      print("None  of the reference cells has a cluster ID. Please check the reference_clusters list provided.")
+      return()
+    } else {
+      reference_gem <- reference_gem[, common_cells]
+      reference_clusters <- reference_clusters[common_cells]
+    }
   } else {
-    reference_gem <- reference_gem[, common_cells]
-    reference_clusters <- reference_clusters[common_cells]
+    # Check markers have gene and cluster columns
+    if (length(intersect(c("gene", "cluster"), colnames(markers))) !=2 ) {
+      message("Please provide a data frame of markers with gene and cluster in columns")
+      return() 
+    }
+    if (!"gene" %in% colnames(markers)) {
+      message("Please provide a data frame of markers with gene and cluster in columns")
+      return()  
+    } else {
+      markers$gene <- toupper(markers$gene)
+    }
   }
-  
+
+  # Target
+  rownames(target_gem) <- toupper(rownames(target_gem))
+  # Remove genes that are zero across all cells
+  target_gem <- target_gem[which(rowSums(target_gem) != 0), ]
+
   # ----------------------------------------------------------------------------------------------------
   # Stage 1: Find signature genes from reference data
-  print("Stage 1: extract signatures genes from reference clusters")
-  
-  so_ref <- Seurat::CreateSeuratObject(raw.data = reference_gem)
-  so_ref <- Seurat::NormalizeData(so_ref)
-  so_ref <- Seurat::ScaleData(so_ref)
-  so_ref@ident <- as.factor(reference_clusters)
-
-  markers <- suppressMessages(Seurat::FindAllMarkers(so_ref, test.use = "MAST", only.pos = TRUE, logfc.threshold = logFC))
-
-  # Filter out signature genes that are not present in the target data
-  markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
-  
-  celltypes <- unique(markers$cluster)
+  if (is.null(markers)) {
+    # ----------------------------------------------------------------------------------------------------
+    # Stage 1: Find signature genes from reference data
+    message("Stage 1: extract signatures genes from reference clusters")
+    markers <- find_markers(reference_gem, reference_clusters, logFC, only.pos=only_pos)
+    # Filter out signature genes that are not present in the target data
+    markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
+    celltypes <- unique(markers$cluster)
+  } else {
+    markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
+    celltypes <- unique(markers$cluster)
+  }
   
   # # ----------------------------------------------------------------------------------------------------
   # # Assess markers with self-mapping
@@ -114,39 +135,34 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   
   # ----------------------------------------------------------------------------------------------------
   # Stage 2: Weight signature genes
-  print("Stage 2: Estimate weights of signature genes")
-  
   weights <- list()
-  
-  if (use_reference_for_weights) {
-    # Min-max normalization of reference gem
-    ref_gem_norm <-  t(apply(reference_gem[markers$gene, ], 1, function(x) normalize_gem(x)))
-    na.values <- which(apply(ref_gem_norm, 1, function(x){any(is.na(x))}))
-    if (length(na.values > 0)) {
-      ref_gem_norm <- ref_gem_norm[-na.values, ]
-    }
+  training_labels <- data.frame(matrix(NA, nrow = ncol(target_gem), ncol = length(celltypes)), row.names = colnames(target_gem))
+  colnames(training_labels) <- celltypes
+  if (estimate_weights) {
+    print("Stage 2: Estimate weights of signature genes")
     
     for (i in 1:length(celltypes)) {
-      #svMisc::progress(i, max.value = length(celltypes), progress.bar = T)
-      svMisc::progress(i*100/length(celltypes), max.value = 100, char = "%")
-      Sys.sleep(0.01)
-      signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
-      IN <- names(which(reference_clusters == celltypes[i]))
-      OUT <- setdiff(colnames(reference_gem), IN)
-      gene.weights <- scID_weight(ref_gem_norm, IN, OUT)
-      weights[[celltypes[i]]] <- gene.weights
-      if (i==length(celltypes)) cat("Done!")
-    }
-    
-  } else {
-    for (i in 1:length(celltypes)) {
-      signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
-      putative_groups <- choose_unsupervised(target_gem, signature_genes)
+      celltype_markers <- markers[which(markers$cluster == celltypes[i]), ]
+      positive_markers <- celltype_markers$gene[which(celltype_markers$avg_logFC > 0)]
+      negative_markers <- celltype_markers$gene[which(celltype_markers$avg_logFC < 0)]
+      
+      putative_groups <- choose_unsupervised(target_gem, positive_markers, negative_markers)
+      training_labels[putative_groups$in_pop, i] <- "IN"
+      training_labels[putative_groups$out_pop, i] <- "OUT"
+      signature_genes <- c(positive_markers, negative_markers)
       gene.weights <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
       weights[[celltypes[i]]] <- gene.weights
       svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
       Sys.sleep(0.01)
       if (i==length(celltypes)) cat("Done!")
+    }
+    names(weights) <- celltypes
+  } else {
+    for (i in 1:length(celltypes)) {
+      signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
+      gene.weights <- markers$weight[which(markers$cluster == celltypes[i])]
+      names(gene.weights) <- signature_genes
+      weights[[celltypes[i]]] <- gene.weights
     }
   }
   
@@ -164,8 +180,9 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
     Sys.sleep(0.01)
     signature <- names(weights[[celltype]])
     weighted_gem <- weights[[celltype]] * target_gem_norm[signature, ]
-    score <- colSums(weighted_gem)/sum(weights[[celltype]])
-    matches <- final_populations(score, likelihood_threshold) # NEED TO SUPPRESS THE MESSAGE
+    score <- colSums(weighted_gem)/sqrt(sum(weights[[celltype]]^2))
+    #scores[as.character(celltype), ] <- score
+    matches <- final_populations(score) 
     scores[as.character(celltype), matches] <- scale(score[matches])
     if (i==length(celltypes)) cat("Done!")
   }
@@ -188,6 +205,6 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   names(labels) <- colnames(scores)
 
   # return result
-  return(labels)
-    
+  return(list(scores=scores, markers=markers, estimated_weights=weights, training_labels=training_labels, labels=labels))
+
 }
