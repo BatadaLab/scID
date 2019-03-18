@@ -23,6 +23,9 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
       return()
     } else {
       reference_gem <- reference_gem[, common_cells]
+      rownames(reference_gem) <- toupper(rownames(reference_gem))
+      # Remove genes that are zero across all cells
+      reference_gem <- reference_gem[which(rowSums(reference_gem) != 0), ]
       reference_clusters <- reference_clusters[common_cells]
     }
   } else {
