@@ -84,6 +84,6 @@ scID_weight <- function(gem, true_cells, false_cells) {
   
   weights[which(is.na(weights))] <- 0
   
-  return(weights/max(weights))
+  return(weights)
 }
 

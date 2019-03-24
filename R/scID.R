@@ -184,11 +184,12 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
     signature <- names(weights[[celltype]])
     weighted_gem <- weights[[celltype]] * target_gem_norm[signature, ]
     score <- colSums(weighted_gem)/sqrt(sum(weights[[celltype]]^2))
-    #scores[as.character(celltype), ] <- score
-    matches <- final_populations(score) 
-    scores[as.character(celltype), matches] <- scale(score[matches])
+    scores[as.character(celltype), ] <- score
+    #matches <- final_populations(score) 
+    #scores[as.character(celltype), matches] <- scale(score[matches])
     if (i==length(celltypes)) cat("Done!")
   }
+  return(scores)
   
   # Resolve multiclass assignments
   print ("Stage 3.3: Resolve multiclass assignments")
