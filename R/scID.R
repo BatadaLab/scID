@@ -8,7 +8,7 @@
 #' @return list of target cluster IDs
 #' @export
 scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_clusters = NULL, markers = NULL,
-                             logFC = 0.5, estimate_weights = FALSE, likelihood_threshold = 0.99, only_pos=FALSE){
+                             logFC = 0.5, estimate_weights = TRUE, weights = NULL, only_pos=FALSE){
   
   #----------------------------------------------------------------------------------------------------
   # Data pre-processing
@@ -138,11 +138,11 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   
   # ----------------------------------------------------------------------------------------------------
   # Stage 2: Weight signature genes
-  weights <- list()
-  training_labels <- data.frame(matrix(NA, nrow = ncol(target_gem), ncol = length(celltypes)), row.names = colnames(target_gem))
-  colnames(training_labels) <- celltypes
   if (estimate_weights) {
     print("Stage 2: Estimate weights of signature genes")
+    weights <- list()
+    training_labels <- data.frame(matrix(NA, nrow = ncol(target_gem), ncol = length(celltypes)), row.names = colnames(target_gem))
+    colnames(training_labels) <- celltypes
     
     for (i in 1:length(celltypes)) {
       celltype_markers <- markers[which(markers$cluster == celltypes[i]), ]
@@ -154,19 +154,23 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
       training_labels[putative_groups$out_pop, i] <- "OUT"
       signature_genes <- c(positive_markers, negative_markers)
       gene.weights <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
-      weights[[celltypes[i]]] <- gene.weights
+      weights[[as.character(celltypes[i])]] <- gene.weights
       svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
       Sys.sleep(0.01)
       if (i==length(celltypes)) cat("Done!")
     }
     names(weights) <- celltypes
   } else {
-    for (i in 1:length(celltypes)) {
-      signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
-      gene.weights <- markers$weight[which(markers$cluster == celltypes[i])]
-      names(gene.weights) <- signature_genes
-      weights[[celltypes[i]]] <- gene.weights
+    if (is.null(weights)) {
+      message("Please provide weights of signature genes or choose to estimate weights from target data")
+      return()
     }
+    # for (i in 1:length(celltypes)) {
+    #   signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
+    #   gene.weights <- markers$weight[which(markers$cluster == celltypes[i])]
+    #   names(gene.weights) <- signature_genes
+    #   weights[[celltypes[i]]] <- gene.weights
+    # }
   }
   
   #----------------------------------------------------------------------------------------------------
@@ -178,18 +182,18 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   colnames(scores) <- colnames(target_gem)
   
   for (i in 1:length(celltypes)) {
-    celltype <- celltypes[i]
+    celltype <- as.character(celltypes[i])
     svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
     Sys.sleep(0.01)
-    signature <- names(weights[[celltype]])
-    weighted_gem <- weights[[celltype]] * target_gem_norm[signature, ]
+    signature <- intersect(names(weights[[celltype]]), rownames(target_gem_norm))
+    weighted_gem <- weights[[celltype]][signature] * target_gem_norm[signature, ]
     score <- colSums(weighted_gem)/sqrt(sum(weights[[celltype]]^2))
     scores[as.character(celltype), ] <- score
     #matches <- final_populations(score) 
     #scores[as.character(celltype), matches] <- scale(score[matches])
     if (i==length(celltypes)) cat("Done!")
   }
-  return(scores)
+  return(list(scores=scores, markers=markers, weights=weights))
   
   # Resolve multiclass assignments
   print ("Stage 3.3: Resolve multiclass assignments")

@@ -18,8 +18,8 @@ choose_unsupervised <- function(gem, positive_markers, negative_markers) {
   } else if (length(positive_markers) == 1) {
     n_pme <- binned_gem[, positive_markers]
   } else {
-    n_pme <- rep(0, ncol(binned_gem))
-    names(n_pme) <- colnames(binned_gem)
+    n_pme <- rep(0, nrow(binned_gem))
+    names(n_pme) <- rownames(binned_gem)
   }
   # Find total number of expressed negative marker genes per cell (n_nme)
   if (length(negative_markers) > 1) {
@@ -27,13 +27,13 @@ choose_unsupervised <- function(gem, positive_markers, negative_markers) {
   } else if (length(negative_markers) == 1) {
     n_nme <- binned_gem[, negative_markers]
   } else {
-    n_nme <- rep(0, ncol(binned_gem))
-    names(n_nme) <- colnames(binned_gem)
+    n_nme <- rep(0, nrow(binned_gem))
+    names(n_nme) <- rownames(binned_gem)
   }
   # Find total number of positive marker genes (n_pm)
-  n_pm <- length(positive_markers)
+  n_pm <- max(length(positive_markers), 1)
   # Find total number of negative marker genes (n_nm)
-  n_nm <- length(negative_markers)
+  n_nm <- max(length(negative_markers), 1)
   
   data <- data.frame(recall = (n_pme/n_pm) - (n_nme/n_nm), precision = (n_pme-n_nme)/n_e)
   
