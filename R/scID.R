@@ -116,7 +116,13 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
           signature_genes <- c(positive_markers, negative_markers)
           in_pop <- intersect(names(which(reference_clusters == celltypes[i])), colnames(ref_gem_norm))
           out_pop <- intersect(names(which(reference_clusters != celltypes[i])), colnames(ref_gem_norm))
-          gene.weights <- scID_weight(ref_gem_norm[signature_genes, ], in_pop, out_pop)
+          if (length(signature_genes) == 1) {
+            gem <- t(as.matrix(ref_gem_norm[signature_genes, ]))
+            rownames(gem) <- signature_genes
+            gene.weights <- scID_weight(gem, in_pop, out_pop)
+          } else {
+            gene.weights <- scID_weight(ref_gem_norm[signature_genes, ], in_pop, out_pop)
+          }
           weights[[as.character(celltypes[i])]] <- gene.weights
           svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
           Sys.sleep(0.01)
