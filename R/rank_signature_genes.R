@@ -81,7 +81,6 @@ scID_weight <- function(gem, true_cells, false_cells) {
     #weights[gene] <- max(numerator/denominator, 0)
     weights[gene] <- numerator/denominator
   }
-  
   weights[which(is.na(weights))] <- 0
   
   return(weights)

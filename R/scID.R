@@ -111,11 +111,11 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
         }
         for (i in 1:length(celltypes)) {
           celltype_markers <- markers[which(markers$cluster == celltypes[i]), ]
-          positive_markers <- celltype_markers$gene[which(celltype_markers$avg_logFC > 0)]
-          negative_markers <- celltype_markers$gene[which(celltype_markers$avg_logFC < 0)]
+          positive_markers <- intersect(celltype_markers$gene[which(celltype_markers$avg_logFC > 0)], rownames(ref_gem_norm))
+          negative_markers <- intersect(celltype_markers$gene[which(celltype_markers$avg_logFC < 0)], rownames(ref_gem_norm))
           signature_genes <- c(positive_markers, negative_markers)
-          in_pop <- names(which(reference_clusters == celltypes[i]))
-          out_pop <- names(which(reference_clusters != celltypes[i]))
+          in_pop <- intersect(names(which(reference_clusters == celltypes[i])), colnames(ref_gem_norm))
+          out_pop <- intersect(names(which(reference_clusters != celltypes[i])), colnames(ref_gem_norm))
           gene.weights <- scID_weight(ref_gem_norm[signature_genes, ], in_pop, out_pop)
           weights[[as.character(celltypes[i])]] <- gene.weights
           svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
