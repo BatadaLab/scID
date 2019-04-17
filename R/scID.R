@@ -110,27 +110,25 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
           ref_gem_norm <- ref_gem_norm[-na.values, ]
         }
         for (i in 1:length(celltypes)) {
-          celltype_markers <- markers[which(markers$cluster == celltypes[i]), ]
-          positive_markers <- intersect(celltype_markers$gene[which(celltype_markers$avg_logFC > 0)], rownames(ref_gem_norm))
-          negative_markers <- intersect(celltype_markers$gene[which(celltype_markers$avg_logFC < 0)], rownames(ref_gem_norm))
-          signature_genes <- c(positive_markers, negative_markers)
-          in_pop <- intersect(names(which(reference_clusters == celltypes[i])), colnames(ref_gem_norm))
-          out_pop <- intersect(names(which(reference_clusters != celltypes[i])), colnames(ref_gem_norm))
+          signature_genes <- markers[which(markers$cluster == celltypes[i]), "gene"]
           if (length(signature_genes) == 1) {
             gem <- t(as.matrix(ref_gem_norm[signature_genes, ]))
             rownames(gem) <- signature_genes
-            gene.weights <- scID_weight(gem, in_pop, out_pop)
+            #gene.weights <- scID_weight(gem, in_pop, out_pop)
+            gene.weights <- scID_weight(gem, labels = reference_clusters, ID = celltypes[i])
           } else {
-            gene.weights <- scID_weight(ref_gem_norm[signature_genes, ], in_pop, out_pop)
+            true_cells <- names(reference_clusters)[which(reference_clusters == celltypes[i])]
+            false_cells <- setdiff(names(reference_clusters), true_cells)
+            gene.weights <- scID_weight(gem = ref_gem_norm[signature_genes, ], true_cells, false_cells)
           }
           weights[[as.character(celltypes[i])]] <- gene.weights
-          svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
+          svMisc::progress(i*100/length(celltypes))#, max.value = 100, char = "-", progress.bar = T)
           Sys.sleep(0.01)
         }
         # Won't need reference data any more
         rm(reference_gem, reference_clusters, ref_gem_norm)
       } else {
-        print("Please provide reference data in order to calculate weights. Alternative select to estimate weights from target data or provide precompted gene weights.")
+        print("Please provide reference data in order to calculate weights, choose to estimate weights from target data, or provide precompted gene weights.")
         return()
       }
     }
@@ -146,10 +144,14 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   
   for (i in 1:length(celltypes)) {
     celltype <- as.character(celltypes[i])
-    svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
-    Sys.sleep(0.01)
     signature <- intersect(names(weights[[celltype]]), rownames(target_gem_norm))
-    weighted_gem <- weights[[celltype]][signature] * target_gem_norm[signature, ]
+    if (length(signature) == 1) {
+      weighted_gem <- t(as.matrix(weights[[celltype]][signature] * target_gem_norm[signature, ]))
+      rownames(weighted_gem) <- signature
+    } else {
+      weighted_gem <- weights[[celltype]][signature] * target_gem_norm[signature, ]
+    }
+    
     score <- colSums(weighted_gem)/sqrt(sum(weights[[celltype]]^2))
     # scores[as.character(celltype), ] <- score
     matches <- final_populations(score) 

@@ -72,7 +72,7 @@ choose_unsupervised <- function(gem, positive_markers, negative_markers) {
 #' @return list of weights for each signature gene
 #' @export
 scID_weight <- function(gem, true_cells, false_cells) {
-  
+
   weights <- rep(NA, nrow(gem))
   names(weights) <- rownames(gem)
   for (gene in rownames(gem)) {
@@ -82,7 +82,59 @@ scID_weight <- function(gem, true_cells, false_cells) {
     weights[gene] <- numerator/denominator
   }
   weights[which(is.na(weights))] <- 0
-  
+
   return(weights)
 }
-
+# scID_weight <- function(gem, labels, ID) {
+# 
+#   weights <- rep(NA, nrow(gem))
+#   names(weights) <- rownames(gem)
+#   
+#   true_cells <- intersect(names(labels)[which(labels == ID)], colnames(gem))
+#   false_cells <- intersect(names(labels)[which(labels != ID)], colnames(gem))
+#   
+#   for (gene in rownames(gem)) {
+#     m_IN <- mean(as.numeric(gem[gene, true_cells]))
+#     sigma_IN <- sd(as.numeric(gem[gene, false_cells]))^2
+#     
+#     rest_IDs <- setdiff(unique(labels), ID)
+#     m_OUTs <- rep(NA, length(rest_IDs))
+#     names(m_OUTs) <- rest_IDs
+#     sigma_OUTs <- rep(NA, length(rest_IDs))
+#     names(sigma_OUTs) <- rest_IDs
+#     for (i in rest_IDs) {
+#       m_OUTs[i] <- mean(as.numeric(gem[gene, names(labels)[which(labels == i)]]))
+#       sigma_OUTs[i] <- sd(as.numeric(gem[gene, names(labels)[which(labels == i)]]))^2
+#     }
+#     w <- (m_IN - m_OUTs) / (sigma_IN + sigma_OUTs + 0.0001)
+#     weights[gene] <- w[which(abs(w) == min(abs(w)))[1]]
+#   }
+#   weights[which(is.na(weights))] <- 0
+# 
+#   return(weights)
+# }
+# scID_weight <- function(gem, labels, ID) {
+#   
+#   weights <- rep(NA, nrow(gem))
+#   names(weights) <- rownames(gem)
+#   
+#   true_cells <- intersect(names(labels)[which(labels == ID)], colnames(gem))
+#   false_cells <- intersect(names(labels)[which(labels != ID)], colnames(gem))
+#   
+#   for (gene in rownames(gem)) {
+#     m_IN <- mean(as.numeric(gem[gene, true_cells]))
+#     sigma_IN <- sd(as.numeric(gem[gene, false_cells]))^2
+#     
+#     rest_IDs <- setdiff(unique(labels), ID)
+#     m_OUTs <- 0
+#     sigma_OUTs <- 0.0001
+#     for (i in rest_IDs) {
+#       m_OUTs <- m_OUTs + mean(as.numeric(gem[gene, names(labels)[which(labels == i)]]))
+#       sigma_OUTs[i] <- sigma_OUTs + sd(as.numeric(gem[gene, names(labels)[which(labels == i)]]))^2
+#     }
+#     weights[gene] <- (m_IN - m_OUTs) / (sigma_IN + sigma_OUTs)
+#   }
+#   weights[which(is.na(weights))] <- 0
+#   
+#   return(weights)
+# }
