@@ -60,8 +60,18 @@ scid_multiclass <- function(target_gem=NULL, reference_gem=NULL, reference_clust
     # Stage 1: Find signature genes from reference data
     message("Stage 1: extract signatures genes from reference clusters")
     markers <- find_markers(reference_gem, reference_clusters, logFC)
+    # Check if DE genes returned
+    if (nrow(markers) == 0) {
+      message("No DE genes identified. Please try again with lower logFC or another reference dataset")
+      return()
+    }
     # Filter out signature genes that are not present in the target data
     markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
+    # Check if common markers exist
+    if (nrow(markers) == 0) {
+      message("None of the DE genes found from the reference are present in the target data.")
+      return()
+    }
     celltypes <- unique(markers$cluster)
   } else {
     markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
