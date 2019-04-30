@@ -4,9 +4,9 @@ find_markers <- function(reference_gem, reference_clusters, logFC, only.pos=FALS
   so_ref <- suppressMessages(Seurat::NormalizeData(so_ref))
   so_ref <- suppressMessages(Seurat::ScaleData(so_ref))
   # For Seurat v2
-  so_ref@ident <- as.factor(reference_clusters)
+  # so_ref@ident <- as.factor(reference_clusters)
   # For Seurat v3
-  # Idents(so_ref) <- reference_clusters
+  Idents(so_ref) <- as.factor(reference_clusters)
   markers <- suppressMessages(Seurat::FindAllMarkers(so_ref, test.use = "MAST", only.pos = only.pos, logfc.threshold = logFC))
   
   return(markers)

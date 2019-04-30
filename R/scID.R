@@ -117,7 +117,7 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
             #gene.weights <- scID_weight(gem, in_pop, out_pop)
             gene.weights <- scID_weight(gem, labels = reference_clusters, ID = celltypes[i])
           } else {
-            true_cells <- names(reference_clusters)[which(reference_clusters == celltypes[i])]
+            true_cells <- names(reference_clusters)[which(reference_clusters == numeric(celltypes[i]))]
             false_cells <- setdiff(names(reference_clusters), true_cells)
             gene.weights <- scID_weight(gem = ref_gem_norm[signature_genes, ], true_cells, false_cells)
           }
