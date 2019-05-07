@@ -117,7 +117,7 @@ scid_multiclass <- function(target_gem=NULL, reference_gem=NULL, reference_clust
       Sys.sleep(1 / length(celltypes))
       signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
       putative_groups <- choose_unsupervised(target_gem[markers$gene, ], signature_genes)
-      weights[[as.character(celltypes[i])]] <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
+      weights[[as.character(celltypes[i])]] <- scID_weight(target_gem_norm[signature_genes, , drop=FALSE], putative_groups$in_pop, putative_groups$out_pop)
       if (i==length(celltypes)) cat("Done!")
     }
   }
@@ -136,7 +136,7 @@ scid_multiclass <- function(target_gem=NULL, reference_gem=NULL, reference_clust
     # svMisc::progress(i*100/length(celltypes))
     # Sys.sleep(1/length(celltypes))
     signature <- names(weights[[as.character(celltypes[i])]])
-    weighted_gem <- weights[[as.character(celltypes[i])]] * target_gem_norm[signature, ]
+    weighted_gem <- weights[[as.character(celltypes[i])]] * target_gem_norm[signature, , drop=FALSE]
     score <- colSums(weighted_gem)/sum(weights[[as.character(celltypes[i])]])
     matches <- final_populations(score, likelihood_threshold)
     scores[as.character(celltype), matches] <- scale(score[matches])
