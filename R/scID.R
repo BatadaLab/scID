@@ -117,7 +117,7 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
             #gene.weights <- scID_weight(gem, in_pop, out_pop)
             gene.weights <- scID_weight(gem, labels = reference_clusters, ID = celltypes[i])
           } else {
-            true_cells <- names(reference_clusters)[which(reference_clusters == numeric(celltypes[i]))]
+            true_cells <- names(reference_clusters)[which(reference_clusters == as.character(celltypes[i]))]
             false_cells <- setdiff(names(reference_clusters), true_cells)
             gene.weights <- scID_weight(gem = ref_gem_norm[signature_genes, ], true_cells, false_cells)
           }
@@ -142,6 +142,9 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   scores <- data.frame(matrix(NA, length(celltypes), ncol(target_gem)), row.names = celltypes)
   colnames(scores) <- colnames(target_gem)
   
+  full_scores <- data.frame(matrix(NA, length(celltypes), ncol(target_gem)), row.names = celltypes)
+  colnames(full_scores) <- colnames(target_gem)
+  
   for (i in 1:length(celltypes)) {
     celltype <- as.character(celltypes[i])
     signature <- intersect(names(weights[[celltype]]), rownames(target_gem_norm))
@@ -156,6 +159,8 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
     # scores[as.character(celltype), ] <- score
     matches <- final_populations(score) 
     scores[as.character(celltype), matches] <- scale(score[matches])
+    full_scores[as.character(celltype), ] <- score
+    
     if (i==length(celltypes)) cat("Done!")
   }
   # return(list(scores=scores, markers=markers, weights=weights))
@@ -165,6 +170,6 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   labels <- apply(scores, 2, function(x) {ifelse(all(is.na(x)), "unassigned", rownames(scores)[which(x == max(x, na.rm = T))])})
 
   # return result
-  return(list(scores=scores, markers=markers, estimated_weights=weights, labels=labels))
+  return(list(scores=scores, markers=markers, estimated_weights=weights, labels=labels, full_scores=full_scores))
 
 }
