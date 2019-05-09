@@ -108,7 +108,7 @@ scid_multiclass <- function(target_gem=NULL, reference_gem=NULL, reference_clust
       signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
       IN <- names(which(reference_clusters == celltypes[i]))
       OUT <- setdiff(colnames(reference_gem), IN)
-      weights[[as.character(celltypes[i])]] <- scID_weight(reference_gem_norm[signature_genes, ], IN, OUT)
+      weights[[as.character(celltypes[i])]] <- scID_weight(reference_gem_norm[signature_genes, ,drop=FALSE], IN, OUT)
       if (i==length(celltypes)) cat("Done!")
     }
   } else {
