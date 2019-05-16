@@ -78,6 +78,8 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
       message("Stage 2: Estimate weights of signature genes from target")
       weights <- list()
       for (i in 1:length(celltypes)) {
+        svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
+        Sys.sleep(0.01)
         celltype_markers <- markers[which(markers$cluster == celltypes[i]), ]
         positive_markers <- celltype_markers$gene[which(celltype_markers$avg_logFC > 0)]
         negative_markers <- celltype_markers$gene[which(celltype_markers$avg_logFC < 0)]
@@ -85,8 +87,6 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
         signature_genes <- c(positive_markers, negative_markers)
         gene.weights <- scID_weight(target_gem_norm[signature_genes, ], training_groups$in_pop, training_groups$out_pop)
         weights[[as.character(celltypes[i])]] <- gene.weights
-        svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
-        Sys.sleep(0.01)
         if (i==length(celltypes)) cat("Done!")
       }
       names(weights) <- celltypes
@@ -98,14 +98,15 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
         ref_gem_norm <-  t(apply(reference_gem[unique(markers$gene), ], 1, function(x) normalize_gene(x)))
         ref_gem_norm <- ref_gem_norm[complete.cases(ref_gem_norm), ]
         for (i in 1:length(celltypes)) {
+          svMisc::progress(i*100/length(celltypes))#, max.value = 100, char = "-", progress.bar = T)
+          Sys.sleep(0.01)
           signature_genes <- markers[which(markers$cluster == celltypes[i]), "gene"]
           true_cells <- names(reference_clusters)[which(reference_clusters == as.character(celltypes[i]))]
           false_cells <- setdiff(names(reference_clusters), true_cells)
           gene.weights <- scID_weight(gem = ref_gem_norm[signature_genes, ,drop=FALSE], true_cells, false_cells)
   
           weights[[as.character(celltypes[i])]] <- gene.weights
-          svMisc::progress(i*100/length(celltypes))#, max.value = 100, char = "-", progress.bar = T)
-          Sys.sleep(0.01)
+          if (i==length(celltypes)) cat("Done!")
         }
         # Won't need reference data any more, remove for efficiency
         rm(reference_gem, reference_clusters, ref_gem_norm)

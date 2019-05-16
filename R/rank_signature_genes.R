@@ -9,7 +9,11 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   positive_markers <- intersect(positive_markers, rownames(gem))
   negative_markers <- intersect(negative_markers, rownames(gem))
   # Bin values to 0 and 1 for present (expressed) and absent genes
-  binned_gem <- apply(gem, 1, function(x) ifelse(x>quantile(x[which(x>0)], 0.25, na.rm = TRUE), 1, 0))
+  #binned_gem <- apply(gem, 1, function(x) ifelse(x>quantile(x[which(x>0)], 0.25, na.rm = TRUE), 1, 0))
+  # biomod2::BinaryTransformation seems faster and more memory efficient
+  sink("aux");
+  binned_gem <- apply(gem, 1, function(x) biomod2::BinaryTransformation(x, threshold = quantile(x[which(x>0)], 0.25, na.rm = TRUE)))
+  sink(NULL);
   
   # Find total number of expressed genes per cell (n_e)
   n_e <- rowSums(binned_gem)
@@ -44,7 +48,9 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   }
   
   library(mclust)
+  sink("aux");
   fit <- Mclust(data)
+  sink(NULL);
   # Get centroids of each cluster
   centroids <- data.frame(matrix(NA, length(unique(fit$classification)), 2), row.names = unique(fit$classification))
   colnames(centroids) <- c("precision", "recall")
