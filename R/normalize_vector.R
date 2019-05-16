@@ -1,5 +1,8 @@
+#' Function to row-normalize a numerical vector by the 99th percentile 
+#' @param x Numerical vector
+#' @return Vector with normalized values
 #' @export
-normalize_gem <- function(x) {
+normalize_gene <- function(x) {
   
   x <- x+1 
   # Added na.rm=TRUE -- see if changes anything

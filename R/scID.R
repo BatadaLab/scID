@@ -2,25 +2,28 @@
 #' @param target_gem Data frame of gene expression (rows) per cell (columns) in target data
 #' @param reference_gem Data frame of gene expression (rows) per cell (columns) in reference data
 #' @param reference_clusters Named list of cluster IDs of reference cells
+#' @param markers Data frame of cluster specific genes that will be used instead of the reference data
 #' @param logFC LogFC threshold for extracting markers from reference clusters
 #' @param use_reference_for_weights Logical to use either reference or target data for sorting the signature genes
-#' @param likelihood_threshold Minimum required likelihood of gene signature score for a cell to be assigned to the respective reference cluster
-#' @return list of target cluster IDs
+#' @param only_pos Logical to include negative markers in the cluster specific gene sets
+#' @param normalize_reference Logical to select if reference data need to be normalized (when raw counts have been provided)
+#' @return list of cluster IDs for target cells
+#' @return scID scores for target cells 
+#' @return markers used 
+#' @return estimated gene weights
 #' @export
-scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_clusters = NULL, markers = NULL,
-                             logFC = 0.5, estimate_weights_from_target = FALSE, weights = NULL, only_pos=FALSE){
+scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_clusters = NULL, markers = NULL,
+                             logFC = 0.5, estimate_weights_from_target = FALSE, weights = NULL, only_pos=FALSE, normalize_reference=TRUE){
   
   #----------------------------------------------------------------------------------------------------
   # Data pre-processing
   if (is.null(reference_gem) && is.null(reference_clusters) && is.null(markers)) {
-    message("Please provide either clustered reference data or list of markers for each reference cluster")
-    return()
+    stop("Please provide either clustered reference data or list of markers for each reference cluster")
   } else if (is.null(markers)) {
     # Check all reference cells have a cluster ID
     common_cells <- intersect(names(reference_clusters), colnames(reference_gem))
     if (length(common_cells) == 0) {
-      print("None  of the reference cells has a cluster ID. Please check the reference_clusters list provided.")
-      return()
+      stop("None  of the reference cells has a cluster ID. Please check the reference_clusters list provided.")
     } else {
       reference_gem <- reference_gem[, common_cells]
       rownames(reference_gem) <- toupper(rownames(reference_gem))
@@ -31,12 +34,10 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   } else {
     # Check markers have gene and cluster columns
     if (length(intersect(c("gene", "cluster"), colnames(markers))) !=2 ) {
-      message("Please provide a data frame of markers with gene and cluster in columns")
-      return() 
+      stop("Please provide a data frame of markers with gene and cluster in columns")
     }
     if (!"gene" %in% colnames(markers)) {
-      message("Please provide a data frame of markers with gene and cluster in columns")
-      return()  
+      stop("Please provide a data frame of markers with gene and cluster in columns")
     } else {
       markers$gene <- toupper(markers$gene)
     }
@@ -53,7 +54,7 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
     # ----------------------------------------------------------------------------------------------------
     # Stage 1: Find signature genes from reference data
     message("Stage 1: extract signatures genes from reference clusters")
-    markers <- find_markers(reference_gem, reference_clusters, logFC, only.pos=only_pos)
+    markers <- find_markers(reference_gem, reference_clusters, logFC, only.pos=only_pos, normalize_reference=normalize_reference)
     # Filter out signature genes that are not present in the target data
     markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
     celltypes <- unique(markers$cluster)
@@ -67,31 +68,22 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
 
   # ----------------------------------------------------------------------------------------------------
   # Min-max normalization of target gem
-  target_gem_norm <- t(apply(target_gem[unique(markers$gene), ], 1, function(x) normalize_gem(x)))
-  na.values <- which(apply(target_gem_norm, 1, function(x){any(is.na(x))}))
-  if (length(na.values > 0)) {
-    target_gem_norm <- target_gem_norm[-na.values, ]
-  }
+  target_gem_norm <- t(apply(target_gem[unique(markers$gene), ], 1, function(x) normalize_gene(x)))
+  target_gem_norm <- target_gem_norm[complete.cases(target_gem_norm), ]
   
   # ----------------------------------------------------------------------------------------------------
   # Stage 2: Weight signature genes
   if (is.null(weights)) {
     if (estimate_weights_from_target) {
-      print("Stage 2: Estimate weights of signature genes from target")
+      message("Stage 2: Estimate weights of signature genes from target")
       weights <- list()
-      # training_labels <- data.frame(matrix(NA, nrow = ncol(target_gem), ncol = length(celltypes)), row.names = colnames(target_gem))
-      # colnames(training_labels) <- celltypes
-      
       for (i in 1:length(celltypes)) {
         celltype_markers <- markers[which(markers$cluster == celltypes[i]), ]
         positive_markers <- celltype_markers$gene[which(celltype_markers$avg_logFC > 0)]
         negative_markers <- celltype_markers$gene[which(celltype_markers$avg_logFC < 0)]
-        
-        putative_groups <- choose_unsupervised(target_gem, positive_markers, negative_markers)
-        # training_labels[putative_groups$in_pop, i] <- "IN"
-        # training_labels[putative_groups$out_pop, i] <- "OUT"
+        training_groups <- choose_training_set(target_gem, positive_markers, negative_markers)
         signature_genes <- c(positive_markers, negative_markers)
-        gene.weights <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
+        gene.weights <- scID_weight(target_gem_norm[signature_genes, ], training_groups$in_pop, training_groups$out_pop)
         weights[[as.character(celltypes[i])]] <- gene.weights
         svMisc::progress(i*100/length(celltypes), max.value = 100, char = "-", progress.bar = T)
         Sys.sleep(0.01)
@@ -100,36 +92,25 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
       names(weights) <- celltypes
     } else {
       if (!is.null(reference_gem) && !is.null(reference_clusters)) {
-        print("Stage 2: Estimate weights of signature genes from reference")
-        # training_labels <- NULL
+        message("Stage 2: Estimate weights of signature genes from reference")
         weights <- list()
         # Normalize reference gem
-        ref_gem_norm <-  t(apply(reference_gem[unique(markers$gene), ], 1, function(x) normalize_gem(x)))
-        na.values <- which(apply(ref_gem_norm, 1, function(x){any(is.na(x))}))
-        if (length(na.values > 0)) {
-          ref_gem_norm <- ref_gem_norm[-na.values, ]
-        }
+        ref_gem_norm <-  t(apply(reference_gem[unique(markers$gene), ], 1, function(x) normalize_gene(x)))
+        ref_gem_norm <- ref_gem_norm[complete.cases(ref_gem_norm), ]
         for (i in 1:length(celltypes)) {
           signature_genes <- markers[which(markers$cluster == celltypes[i]), "gene"]
-          if (length(signature_genes) == 1) {
-            gem <- t(as.matrix(ref_gem_norm[signature_genes, ]))
-            rownames(gem) <- signature_genes
-            #gene.weights <- scID_weight(gem, in_pop, out_pop)
-            gene.weights <- scID_weight(gem, labels = reference_clusters, ID = celltypes[i])
-          } else {
-            true_cells <- names(reference_clusters)[which(reference_clusters == as.character(celltypes[i]))]
-            false_cells <- setdiff(names(reference_clusters), true_cells)
-            gene.weights <- scID_weight(gem = ref_gem_norm[signature_genes, ], true_cells, false_cells)
-          }
+          true_cells <- names(reference_clusters)[which(reference_clusters == as.character(celltypes[i]))]
+          false_cells <- setdiff(names(reference_clusters), true_cells)
+          gene.weights <- scID_weight(gem = ref_gem_norm[signature_genes, ,drop=FALSE], true_cells, false_cells)
+  
           weights[[as.character(celltypes[i])]] <- gene.weights
           svMisc::progress(i*100/length(celltypes))#, max.value = 100, char = "-", progress.bar = T)
           Sys.sleep(0.01)
         }
-        # Won't need reference data any more
+        # Won't need reference data any more, remove for efficiency
         rm(reference_gem, reference_clusters, ref_gem_norm)
       } else {
-        print("Please provide reference data in order to calculate weights, choose to estimate weights from target data, or provide precompted gene weights.")
-        return()
+        stop("Please provide reference data in order to calculate weights, choose to estimate weights from target data, or provide precompted gene weights.")
       }
     }
   }
@@ -137,7 +118,7 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   #----------------------------------------------------------------------------------------------------
   # Stage 3
   # Find scores and putative matches
-  print("Stage 3.1-2: Calculate scores and find matching cells")
+  message("Stage 3.1-2: Calculate scores and find matching cells")
   
   scores <- data.frame(matrix(NA, length(celltypes), ncol(target_gem)), row.names = celltypes)
   colnames(scores) <- colnames(target_gem)
@@ -148,28 +129,21 @@ scid_match_cells <- function(target_gem = NULL, reference_gem = NULL, reference_
   for (i in 1:length(celltypes)) {
     celltype <- as.character(celltypes[i])
     signature <- intersect(names(weights[[celltype]]), rownames(target_gem_norm))
-    if (length(signature) == 1) {
-      weighted_gem <- t(as.matrix(weights[[celltype]][signature] * target_gem_norm[signature, ]))
-      rownames(weighted_gem) <- signature
-    } else {
-      weighted_gem <- weights[[celltype]][signature] * target_gem_norm[signature, ]
-    }
+    weighted_gem <- weights[[celltype]][signature] * target_gem_norm[signature, ,drop=FALSE]
     
     score <- colSums(weighted_gem)/sqrt(sum(weights[[celltype]]^2))
-    # scores[as.character(celltype), ] <- score
     matches <- final_populations(score) 
     scores[as.character(celltype), matches] <- scale(score[matches])
     full_scores[as.character(celltype), ] <- score
     
     if (i==length(celltypes)) cat("Done!")
   }
-  # return(list(scores=scores, markers=markers, weights=weights))
   
   # Resolve multiclass assignments
-  print ("Stage 3.3: Resolve multiclass assignments")
+  message ("Stage 3.3: Resolve multiclass assignments")
   labels <- apply(scores, 2, function(x) {ifelse(all(is.na(x)), "unassigned", rownames(scores)[which(x == max(x, na.rm = T))])})
 
   # return result
-  return(list(scores=scores, markers=markers, estimated_weights=weights, labels=labels, full_scores=full_scores))
+  return(list(markers=markers, estimated_weights=weights, labels=labels, scores=full_scores))
 
 }
