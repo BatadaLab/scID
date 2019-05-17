@@ -1,1 +1,16 @@
-theme: jekyll-theme-slate
+ruby
+
+# Site settings
+description: A blog about lorem ipsum
+baseurl: "" # the subpath
+url: "" # the base hostname &/|| protocol for your site
+
+# User settings
+username: Lorem Ipsum
+user_description: Lorem Developer
+user_title: Lorem Ipsum
+email: lorem@ipsum.com
+twitter_username: loremipsum
+github_username:  loremipsum
+gplus_username:  loremipsum
+disqus_username: loremipsum
