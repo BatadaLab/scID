@@ -29,7 +29,7 @@ scID_output <- scID::scid_multiclass(target_gem, reference_gem, reference_cluste
 
 ### Output
 
-scID_output is a list of two objects 
+scID_output is a list of four objects 
 
 1. ```scID_output$labels``` A named list of cluster labels for the target cells
 
