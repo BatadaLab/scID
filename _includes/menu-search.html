@@ -1,0 +1,65 @@
+<div class="search-wrapper">
+
+    <div class="search-form">
+        <input arial-label="Search for a post" type="text" class="search-field" placeholder="Search...">
+        <svg class="icon-remove-sign"><use xlink:href="#icon-close"></use></svg>
+
+        <ul class="search-results search-list"></ul>
+    </div>
+
+</div>
+
+<!-- Menu Open -> Fade effect -->
+<div id="fade" class="overlay"></div>
+<a id="slide" class="slideButton fade">
+    <svg id="open" class="icon-menu"><use xlink:href="#icon-menu"></use></svg>
+    <svg id="close" class="icon-menu"><use xlink:href="#icon-close"></use></svg>
+</a>
+
+<aside id="sidebar">
+  <div id="topmenu">
+    {% assign filename = page.url
+                         | replace_first: '/', ''
+                         | replace: '/', '-'
+                         | replace: '.html', '.md' %}
+    <ul>
+      <li><span>1</span></li>
+      <li><span> {{page.url}}</span></li>
+      <li><span>⌘ blogspace λ </span></li>
+      <li><span>* Menu</span></li>
+    </ul>
+
+    <ul>
+      <li><span>utf-8</span></li>
+      <li><span>web</span></li>
+      <li><span>.html</span></li>
+    </ul>
+  </div>
+
+  <nav id="navigation" role="navigation">
+    {% for section in site.links %}
+      <ul>
+      {% for link in section[1] %}
+        {% if link.external %}
+            <li>
+                <a href="{{ link.url }}">{{ link.title }}</a>
+            </li>
+        {% else %}
+            <li>
+                <span class="counter-menu">{{link.key_trigger}}</span>
+                <svg viewBox="0 0 50 50" class="icon-arrow-menu">
+                    <use xlink:href="#icon-right-arrow"></use>
+                </svg>
+                <a key-trigger={{ link.key_trigger }}
+                    href="{{ site.url }}{{ link.url }}"> {{ link.title }}</a>
+            </li>
+        {% endif %}
+      {% endfor %}
+      </ul>
+    {% endfor %}
+  </nav>
+</aside>
+
+<a id="search" class="dosearch">
+    <svg class="icon-menu icon-search"><use xlink:href="#icon-search"></use></svg>
+</a>
