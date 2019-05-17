@@ -26,7 +26,8 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
       stop("None  of the reference cells has a cluster ID. Please check the reference_clusters list provided.")
     } else {
       reference_gem <- reference_gem[, common_cells]
-      rownames(reference_gem) <- toupper(rownames(reference_gem))
+      rownames(reference_gem) <- make.names(toupper(rownames(reference_gem)), unique=TRUE)
+        
       # Remove genes that are zero across all cells
       reference_gem <- reference_gem[which(rowSums(reference_gem) != 0), ]
       reference_clusters <- reference_clusters[common_cells]
@@ -44,7 +45,7 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
   }
 
   # Target
-  rownames(target_gem) <- toupper(rownames(target_gem))
+  rownames(target_gem) <- make.names(toupper(rownames(target_gem)), unique=TRUE)
   # Remove genes that are zero across all cells
   target_gem <- target_gem[which(rowSums(target_gem) != 0), ]
 
