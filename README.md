@@ -41,6 +41,7 @@ scID_output is a list of four objects
 
 ## Vignettes
 
+[Identification of equivalent cells across single-cell RNA-seq datasets](https://github.com/BatadaLab/scID/blob/master/vignettes/Mapping_example.md)
 
 ## Need help?
 To report bugs or ask any questions please use the [GitHub issues tracker](https://github.com/BatadaLab/scID/issues).
