@@ -16,6 +16,29 @@ install.packages('devtools')
 devtools::install_github("BatadaLab/scID")
 ```
 
+## Usage
+Given two single-cell RNA-seq gene expression datasets with one of them having known groups of cells (clusters), scID can be used to identify transcriptionally similar cells in the second dataset. 
+
+```
+scID_output <- scID::scid_multiclass(target_gem, reference_gem, reference_clusters, ...)
+```
+### Input
+1. ```target_gem``` An nxm data frame of n genes (rows) in m cells (columns) of the dataset with unknown grouping, where each entry is library-depth or column normalized gene expression. Cell names are expected to be unique
+2. ```reference_gem``` An NxM data frame of N genes (rows) in M cells (columns) of the dataset with known grouping, where each entry is library-depth or column normalized gene expression 
+3. ```reference_clusters``` A list of cluster labels for the reference cells
+
+### Output
+
+scID_output is a list of two objects 
+
+1. ```scID_output$labels``` A named list of cluster labels for the target cells
+
+2. ```scID_output$markers``` A data frame of signature genes extracted from the reference clusters 
+
+3. ```scID_output$weights``` A list of the estimated weights for all cluster-specific genes 
+
+4. ```scID_output$scores``` A data frame of scores of target cells (columns) for each reference cluster-specific geneset (rows)
+
 ## Vignettes
 
 
