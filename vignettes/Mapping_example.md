@@ -8,13 +8,15 @@ vignette: >
     %\VignetteEncoding{UTF-8}
 ---
 
-This tutorial is an example pipeline for mapping across two 10X datasets of E18 mouse brain cells and nuclei from cortex, hippocampus and subverticular zone. The raw counts for the reference and the target data can be found [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/neuron_9k) and [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/nuclei_900) respectively. However, here we provide the TPM normalized values to speed-up preprocessing.
+# Tutorial: Identification of equivalent cells across single-cell RNA-seq datasets
 
-The reference cells can be grouped into 15 clusters as shown in the tSNE plot
+This tutorial is an example of using scID for mapping across two 10X datasets of E18 mouse brain cells and nuclei from cortex, hippocampus and subverticular zone. The raw counts for the reference and the target data can be found [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/neuron_9k) and [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/nuclei_900) respectively. To speed-up preprocessing you can download the [TPM-normalized data](../ExampleData/) instead.
+
+The reference cells can be grouped into 15 clusters as shown in the next plot.
 ![](../ExampleData/figures/Reference_tSNE.png)
 
 ### Mapping across datasets
-After loading the libraries we read the files
+First, we need to load scID library and read the files. 
 ```
 library(scID)
 
@@ -24,7 +26,7 @@ reference_gem <- readRDS(file="~/scID/ExampleData/reference_gem.rds")
 reference_clusters <- readRDS(file="~/scID/ExampleData/reference_clusters.rds")
 ```
 
-Next we run scID with the above inputs and the following settings:
+Next, we run scID with the above inputs and the following settings:
 1. ```normalize_reference``` is set to ```FALSE``` as the reference data is already normalized. Any library-depth normalization (e.g. TPM, CPM) is compatibe with scID, but not log-transformed data. 
 2. ```logFC``` is defining minimum logFold-change for a gene to be seleced as cluster-specific. Low ```logFC``` lead to identification of longer lists of cluster-specific genes that can help resolve classes in presense of very similar reference clusters but will require longer computational time.  
 3. ```estimate_weights_from_target``` is set to ```TRUE``` in order to estimated gene weights from the target by selecting training target cells as described in the [manuscript](https://www.biorxiv.org/content/10.1101/470203v1). Alternatively, weights can be estimated from the reference data (using the known cell labels), which is recommended when library depth of the two datasets is similar or when the reference clusters are transcriptionally similar. 
