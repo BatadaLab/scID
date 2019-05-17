@@ -10,7 +10,7 @@ vignette: >
 
 # Tutorial: Identification of equivalent cells across single-cell RNA-seq datasets
 
-This tutorial is an example of using scID for mapping across two 10X datasets of E18 mouse brain [cells](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/neuron_9k) and [nuclei](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/nuclei_900) from cortex, hippocampus and subverticular zone. To speed-up preprocessing you can download the [TPM-normalized data](../ExampleData/) we have pre-computed.
+This tutorial is an example of using scID for mapping across two 10X datasets of E18 mouse brain [single-cells](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/neuron_9k) and [single-nuclei](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/nuclei_900) from cortex, hippocampus and subverticular zone. To speed-up preprocessing you can download the [TPM-normalized data](../ExampleData/) we have pre-computed.
 
 The reference cells can be grouped into 15 clusters as shown in the next plot.
 ![](../ExampleData/figures/Reference_tSNE.png)
