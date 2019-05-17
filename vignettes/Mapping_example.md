@@ -11,7 +11,7 @@ vignette: >
 This tutorial is an example pipeline for mapping across two 10X datasets of E18 mouse brain cells and nuclei from cortex, hippocampus and subverticular zone. The raw counts for the reference and the target data can be found [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/neuron_9k) and [here](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/nuclei_900) respectively. However, here we provide the TPM normalized values to speed-up preprocessing.
 
 The reference cells can be grouped into 15 clusters as shown in the tSNE plot
-![](../../ExampleData/figures/Reference_tSNE.png)
+![](../ExampleData/figures/Reference_tSNE.png)
 
 ### Mapping across datasets
 After loading the libraries we read the files
