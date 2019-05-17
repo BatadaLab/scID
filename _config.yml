@@ -14,3 +14,5 @@ twitter_username: loremipsum
 github_username:  loremipsum
 gplus_username:  loremipsum
 disqus_username: loremipsum
+
+theme: jekyll-theme-slate
