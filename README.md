@@ -4,7 +4,7 @@ The power of single cell RNA sequencing (scRNA-seq) stems from its ability to un
 
 scID classifies cells of a given target dataset based on their transcriptional similarity to given reference clusters in 4 steps. As a first step, scID extracts cluster-specific gene sets from the reference data and calculates weights (based on Fisher's Linear Discriminant Analysis) that represent their discriminative power to identify the cluster of interest. Next, scID scores all target cells based on the expression of the cluster-specific gene sets and, finally, identifies equivalent target cells by fitting a mixture of Gaussian distributions. 
 
-![](https://github.com/BatadaLab/scID/blob/master/scID_pipeline.png)
+![](https://github.com/BatadaLab/scID/blob/master/assets/images/scID_pipeline.png)
 
 
 ## Installation
