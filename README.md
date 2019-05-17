@@ -19,6 +19,11 @@ devtools::install_github("BatadaLab/scID")
 ## Vignettes
 
 
+## Need help?
+If you have any questions about scID it would be helpful for us and the whole community to create a new [issue](https://github.com/BatadaLab/scID/issues).
+
+
+
 
 
 
