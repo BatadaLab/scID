@@ -95,8 +95,18 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
     # Stage 1: Find signature genes from reference data
     message("Stage 1: extract signatures genes from reference clusters")
     markers <- find_markers(reference_gem, reference_clusters, logFC)
+    # Check if DE genes returned
+    if (nrow(markers) == 0) {
+      message("No DE genes identified. Please try again with lower logFC or another reference dataset")
+      return()
+    }
     # Filter out signature genes that are not present in the target data
     markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
+    # Check if common markers exist
+    if (nrow(markers) == 0) {
+      message("None of the DE genes found from the reference are present in the target data.")
+      return()
+    }
     celltypes <- unique(markers$cluster)
   } else {
     markers <- markers[which(markers$gene %in% rownames(target_gem)), ]
@@ -133,7 +143,7 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
       signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
       IN <- names(which(reference_clusters == celltypes[i]))
       OUT <- setdiff(colnames(reference_gem), IN)
-      weights[[as.character(celltypes[i])]] <- scID_weight(reference_gem_norm[signature_genes, ], IN, OUT)
+      weights[[as.character(celltypes[i])]] <- scID_weight(reference_gem_norm[signature_genes, ,drop=FALSE], IN, OUT)
       if (i==length(celltypes)) cat("Done!")
     }
   } else {
@@ -142,7 +152,7 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
       Sys.sleep(1 / length(celltypes))
       signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
       putative_groups <- choose_unsupervised(target_gem[markers$gene, ], signature_genes)
-      weights[[as.character(celltypes[i])]] <- scID_weight(target_gem_norm[signature_genes, ], putative_groups$in_pop, putative_groups$out_pop)
+      weights[[as.character(celltypes[i])]] <- scID_weight(target_gem_norm[signature_genes, , drop=FALSE], putative_groups$in_pop, putative_groups$out_pop)
       if (i==length(celltypes)) cat("Done!")
     }
   }
@@ -161,7 +171,7 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
     # svMisc::progress(i*100/length(celltypes))
     # Sys.sleep(1/length(celltypes))
     signature <- names(weights[[as.character(celltypes[i])]])
-    weighted_gem <- weights[[as.character(celltypes[i])]] * target_gem_norm[signature, ]
+    weighted_gem <- weights[[as.character(celltypes[i])]] * target_gem_norm[signature, , drop=FALSE]
     score <- colSums(weighted_gem)/sum(weights[[as.character(celltypes[i])]])
     matches <- final_populations(score, likelihood_threshold)
     scores[as.character(celltype), matches] <- scale(score[matches])
