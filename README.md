@@ -8,10 +8,16 @@ scID classifies cells of a given target dataset based on their transcriptional s
 
 
 ## Installation
+On May 17, 2019, we released the new version of scID (v2.0.0) that uses negative markers together with positive for identifying equivalent cells. We have seen that this improves classification in presense of very simlar cell types in the dataset.
+
 scID can be installed using the devtools R package:
 ```
+install.packages('devtools')
 devtools::install_github("BatadaLab/scID")
 ```
+
+## Vignettes
+
 
 
 
