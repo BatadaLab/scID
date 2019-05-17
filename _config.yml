@@ -3,13 +3,13 @@ title: scID
 description: R library for identifying equivalent cell populations across single-cell RNA-sequencing data
 
 
-```ruby
+ruby
 username: Katerina Boufea
 github_username: kboufea
 email: katerina.boufea@ed.ac.uk
-```
 
-```yaml
+
+yaml
 links:
   section_1: # you can use any name
     - title: home # show on menu
@@ -27,4 +27,3 @@ links:
     - title: about me
       url: /about
       key_trigger: 5
-```
