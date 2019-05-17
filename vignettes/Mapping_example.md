@@ -53,13 +53,13 @@ So, the following plot shows the expression of cluster-specific genes in the ref
 ```
 make_heatmap(gem = reference_gem, labels = reference_clusters, markers = markers)
 ```
-![](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Reference_heatmap.png)
+![](../ExampleData/figures/Reference_heatmap.png)
 
 and the respective heatmap of target nuclei data grouped by scID is shown below
 ```
 make_heatmap(gem = target_gem, labels = scID_output$labels, markers = markers)
 ```
-![](https://github.com/BatadaLab/scID/blob/master/ExampleData/figures/Target_heatmap.png)
+![](../ExampleData/figures/Target_heatmap.png)
 
 Here we can see that the gene expression pattern in the target data is very similar to the one in the reference data. The gray column shows that no target cell was assigned to the reference clusters 5 and 13.
 
