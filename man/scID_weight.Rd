@@ -9,14 +9,12 @@ scID_weight(gem, true_cells, false_cells)
 \arguments{
 \item{gem}{Data frame of signature genes in cells}
 
-\item{true_cells}{list of cell names that are confidently IN-population
-should match with column names of gem}
+\item{true_cells}{List of training IN cells}
 
-\item{false_cells}{list of cell names that are confidently OUT-population
-should match with column names of gem}
+\item{false_cells}{List of training OUT cells}
 }
 \value{
-list of weights for each signature gene
+List of weights for signature genes
 }
 \description{
 Main function for estimation of gene ranks

@@ -1,4 +1,8 @@
+#' Function to identify matching population from scID score by fitting a Gaussian finite mixture model from Mclust
+#' @param score List of scID scores for target cells
+#' @return List of matching cells
 #' @export
+<<<<<<< HEAD
 final_populations <- function(score, likelihood_threshold) {
   results <- tryCatch(mixtools::normalmixEM(score, k=2, fast = TRUE, verb = FALSE),error = function(e) {return(NULL)})
   if (is.null(results)) {
@@ -11,5 +15,26 @@ final_populations <- function(score, likelihood_threshold) {
                          names(score)[which(score >= min(mixmdl$mu))])
     
     return(matches)
+=======
+
+final_populations <- function(score) {
+  
+  fit <- mclust::densityMclust(score)
+  
+  # Calculate average scID score per group of cells
+  avgScore <- rep(NA, length(unique(fit$classification)))
+  names(avgScore) <- unique(fit$classification)
+  for (ID in names(avgScore)) {
+    avgScore[ID] <- mean(score[names(which(fit$classification == ID))])
+>>>>>>> develop
   }
+  
+  matches <- names(fit$classification)[which(fit$classification == names(which(avgScore == max(avgScore))))]
+  
 }
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> develop
