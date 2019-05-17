@@ -5,37 +5,13 @@
 \title{Main function to get Gene expression matrix and signature genes and return matches and scores}
 \usage{
 scid_multiclass(target_gem = NULL, reference_gem = NULL,
-<<<<<<< HEAD
-  reference_clusters = NULL, logFC = 0.5,
-  use_reference_for_weights = FALSE, likelihood_threshold = 0.99,
-  markers = NULL)
-=======
   reference_clusters = NULL, markers = NULL, logFC = 0.5,
   estimate_weights_from_target = FALSE, weights = NULL,
   only_pos = FALSE, normalize_reference = TRUE)
->>>>>>> develop
 }
 \arguments{
 \item{target_gem}{Data frame of gene expression (rows) per cell (columns) in target data}
 
-<<<<<<< HEAD
-\item{reference_gem}{(optional) Data frame of gene expression (rows) per cell (columns) in reference data}
-
-\item{reference_clusters}{(optional) Named list of cluster IDs of reference cells}
-
-\item{logFC}{LogFC threshold for extracting markers from reference clusters using MAST}
-
-\item{use_reference_for_weights}{Logical to use either reference or target data for sorting the signature genes}
-
-\item{likelihood_threshold}{Minimum required likelihood of gene signature score for a cell to be assigned to the respective reference cluster}
-
-\item{markers}{(optional) Data frame with of genes and cluster IDs for which they are markers. Has to have "gene" and "cluster" as column names}
-}
-\value{
-list of labels for target cells
-
-table of marker genes per cluster
-=======
 \item{reference_gem}{Data frame of gene expression (rows) per cell (columns) in reference data}
 
 \item{reference_clusters}{Named list of cluster IDs of reference cells}
@@ -58,7 +34,6 @@ scID scores for target cells
 markers used
 
 estimated gene weights
->>>>>>> develop
 }
 \description{
 Main function to get Gene expression matrix and signature genes and return matches and scores
