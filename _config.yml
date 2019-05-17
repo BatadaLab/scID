@@ -1,29 +1,7 @@
 theme: jekyll-theme-slate
-title: scID
+name: scID
 description: R library for identifying equivalent cell populations across single-cell RNA-sequencing data
+higlighter: rogue
+url: "https://batadalab.github.io/scID/"
 
-
-ruby
-username: Katerina Boufea
-github_username: kboufea
-email: katerina.boufea@ed.ac.uk
-
-
-yaml
-links:
-  section_1: # you can use any name
-    - title: home # show on menu
-      url: / #link
-      key_trigger: 1 # link shortcut and show on the left of the title
-    - title: my posts
-      url: /posts
-      key_trigger: 2
-    - title: series
-      url: /series
-      key_trigger: 3
-    - title: tags
-      url: /tags
-      key_trigger: 4
-    - title: about me
-      url: /about
-      key_trigger: 5
+permalink: pretty
