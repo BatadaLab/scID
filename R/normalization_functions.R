@@ -13,3 +13,10 @@ normalize_gene <- function(x) {
   return(x_norm)
 }
 
+#' Function to convert gene counts CPM-normalized
+#' @param gem Data frame of 
+#' @return CPM-normalized gene expression matrix 
+#' @export
+counts_to_cpm <- function (counts_gem) {
+  return(t(t(counts_gem)/colSums(counts_gem))) * 10^6
+}
