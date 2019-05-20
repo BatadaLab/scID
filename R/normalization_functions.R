@@ -18,5 +18,14 @@ normalize_gene <- function(x) {
 #' @return CPM-normalized gene expression matrix 
 #' @export
 counts_to_cpm <- function (counts_gem) {
-  return(t(t(counts_gem)/colSums(counts_gem))) * 10^6
+  
+  # Discard genes that are zero across all cells
+  IDX_ZEROS <- apply(counts_gem, 1, function(row) all(row==0))
+  counts_gem <- counts_gem[!IDX_ZEROS,]
+  print(sprintf("After discarding all zero rows, left with %s rows.", dim(counts_gem)[1]))
+  
+  counts_scater <- SingleCellExperiment::SingleCellExperiment(assays = list(counts = as.matrix(counts_gem)))
+  gem_cpm = scater::calculateCPM(counts_scater)
+  
+  return(gem_cpm)
 }
