@@ -41,11 +41,7 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   n_nm <- max(length(negative_markers), 1)
   
   data <- data.frame(recall = (n_pme/n_pm) - (n_nme/n_nm), precision = (n_pme-n_nme)/n_e)
-  
-  na.values <- which(apply(data, 1, function(x){any(is.na(x))}))
-  if (length(na.values) > 0) {
-    data <- data[-na.values, ]
-  }
+  data <- data[complete.cases(data), ]
   
   library(mclust)
   sink("aux");
@@ -66,7 +62,7 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   # IN_id <- intersect(rownames(centroids)[which(centroids$recall == max(centroids$recall))], 
   #                    rownames(centroids)[which(centroids$precision == max(centroids$precision))])
 
-  in_pop <- names(fit$classification)[which(fit$classification %in% IN_id)]
+  in_pop <- colnames(gem)[which(fit$classification %in% IN_id)]
   return(list(in_pop=in_pop, out_pop=setdiff(colnames(gem), in_pop)))
 }
 
