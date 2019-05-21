@@ -55,8 +55,8 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   centroids <- data.frame(matrix(NA, length(unique(fit$classification)), 2), row.names = unique(fit$classification))
   colnames(centroids) <- c("precision", "recall")
   for (ID in rownames(centroids)) {
-    centroids[ID, "precision"] <- mean(data[names(which(fit$classification == ID)), "precision"]) 
-    centroids[ID, "recall"] <- mean(data[names(which(fit$classification == ID)), "recall"]) 
+    centroids[ID, "precision"] <- mean(data[which(fit$classification == ID), "precision"]) 
+    centroids[ID, "recall"] <- mean(data[which(fit$classification == ID), "recall"]) 
   }
   
   # Choose both

@@ -13,7 +13,7 @@
 #' @return estimated gene weights
 #' @export
 scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_clusters = NULL, markers = NULL,
-                             logFC = 0.5, estimate_weights_from_target = FALSE, weights = NULL, only_pos=FALSE, normalize_reference=TRUE){
+                            logFC = 0.5, estimate_weights_from_target = FALSE, weights = NULL, only_pos=FALSE, normalize_reference=TRUE){
   
   #----------------------------------------------------------------------------------------------------
   # Data pre-processing
