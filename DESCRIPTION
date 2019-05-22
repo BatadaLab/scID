@@ -22,5 +22,7 @@ VignetteBuilder: knitr
 Imports: Seurat, 
 	 svMisc,
 	 pheatmap,
-	 mixtools
-	 
+	 ggplot2, 
+	 mclust, 
+	 scater, 
+	 data.table
