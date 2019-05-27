@@ -19,7 +19,8 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
   # Data pre-processing
   if (is.null(reference_gem) && is.null(reference_clusters) && is.null(markers)) {
     stop("Please provide either clustered reference data or list of markers for each reference cluster")
-  } else if (is.null(markers)) {
+  } 
+  if (!is.null(reference_gem) && !is.null(reference_clusters)) {
     # Check all reference cells have a cluster ID
     common_cells <- intersect(names(reference_clusters), colnames(reference_gem))
     if (length(common_cells) == 0) {
@@ -27,22 +28,20 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
     } else {
       reference_gem <- reference_gem[, common_cells]
       rownames(reference_gem) <- make.names(toupper(rownames(reference_gem)), unique=TRUE)
-        
+      
       # Remove genes that are zero across all cells
       reference_gem <- reference_gem[which(rowSums(reference_gem) != 0), ]
       reference_clusters <- reference_clusters[common_cells]
     }
-  } else {
+  }
+  if (!is.null(reference_gem)) {
     # Check markers have gene and cluster columns
     if (length(intersect(c("gene", "cluster"), colnames(markers))) !=2 ) {
       stop("Please provide a data frame of markers with gene and cluster in columns")
     }
-    if (!"gene" %in% colnames(markers)) {
-      stop("Please provide a data frame of markers with gene and cluster in columns")
-    } else {
-      markers$gene <- toupper(markers$gene)
-    }
-  }
+    markers$gene <- toupper(markers$gene)
+  } 
+  
 
   # Target
   rownames(target_gem) <- make.names(toupper(rownames(target_gem)), unique=TRUE)
