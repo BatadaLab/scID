@@ -5,7 +5,7 @@
 #' @export
 make_heatmap <- function(gem, labels, markers) {
   
-  rownames(gem) <- toupper(rownames(gem))
+  rownames(gem) <- make.names(toupper(rownames(gem)), unique=TRUE)
   markers$gene <- toupper(markers$gene)
 
   # Keep positive markers
@@ -43,7 +43,7 @@ make_heatmap <- function(gem, labels, markers) {
 #' @export
 plot_score_2D <- function(gem, labels, markers, clusterID, weights) {
   
-  rownames(gem) <- toupper(rownames(gem))
+  rownames(gem) <- make.names(toupper(rownames(gem)), unique=TRUE)
   markers$gene <- toupper(markers$gene)
   
   markers <- markers[which(markers$cluster == clusterID), ]
