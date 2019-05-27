@@ -86,7 +86,7 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
         negative_markers <- celltype_markers$gene[which(celltype_markers$avg_logFC < 0)]
         training_groups <- choose_training_set(target_gem, positive_markers, negative_markers)
         signature_genes <- c(positive_markers, negative_markers)
-        gene.weights <- scID_weight(target_gem_norm[signature_genes, ], training_groups$in_pop, training_groups$out_pop)
+        gene.weights <- scID_weight(target_gem_norm[signature_genes, , drop=FALSE], training_groups$in_pop, training_groups$out_pop)
         weights[[as.character(celltypes[i])]] <- gene.weights
         if (i==length(celltypes)) cat("Done!")
       }
