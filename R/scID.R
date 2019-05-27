@@ -34,7 +34,7 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
       reference_clusters <- reference_clusters[common_cells]
     }
   }
-  if (!is.null(reference_gem)) {
+  if (!is.null(markers)) {
     # Check markers have gene and cluster columns
     if (length(intersect(c("gene", "cluster"), colnames(markers))) !=2 ) {
       stop("Please provide a data frame of markers with gene and cluster in columns")
