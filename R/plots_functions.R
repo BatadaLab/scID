@@ -8,35 +8,30 @@ make_heatmap <- function(gem, labels, markers) {
   rownames(gem) <- toupper(rownames(gem))
   markers$gene <- toupper(markers$gene)
 
+  # Keep positive markers
+  markers <- markers[which(markers$avg_logFC > 0), ]
   # Keep markers present in gem
   markers <- markers[which(markers$gene %in% rownames(gem)), ]
   
-  celltypes <- unique(labels)
-  
-  nrows <- length(unique(markers$cluster))
-  ncols <- length(celltypes)
+  celltypes <- unique(markers$cluster)
   
   gem_avg <- matrix(NA, nrows, ncols)
-  for (i in 1:ncols) {
+  for (i in 1:length(celltypes)) {
     cells <- na.omit(names(labels)[which(labels == celltypes[i])])
-    if (length(cells) > 1) {
-      avg_exp <- rowMeans(gem[toupper(markers$gene), cells])
-    } else if (length(cells) == 1) {
-      avg_exp <- gem[toupper(markers$gene), cells]
-      names(avg_exp) <- toupper(markers$gene)
+    if (length(cells) >= 1) {
+      avg_exp <- rowMeans(gem[toupper(markers$gene), cells, drop = FALSE])
     } else {
       next
     }
-    for (j in 1:nrows) {
-      gem_avg[j,i] <- mean(na.omit(avg_exp[toupper(markers$gene[which(markers$cluster == unique(markers$cluster)[j])])]))
+    for (j in 1:length(celltypes)) {
+      gem_avg[j,i] <- mean(na.omit(avg_exp[toupper(markers$gene[which(markers$cluster == celltypes[j])])]))
     }
   }
   
   rownames(gem_avg) <- paste("gs", unique(markers$cluster), sep = "_")
   colnames(gem_avg) <- paste("Cl", celltypes, sep = "_")
   
-  pheatmap::pheatmap(gem_avg, border="white", #color = colorspace::diverge_hcl(50, h=c(180, 70), c=70, l=c(70, 90)), 
-                     cluster_rows = F, cluster_cols = F, border_color = F, scale = "row")
+  pheatmap::pheatmap(gem_avg, border="white", cluster_rows = F, cluster_cols = F, border_color = F, scale = "row")
 }
 
 #' Function to plot heatmap of average cluster-specific geneset expression in clusters of cells
@@ -47,6 +42,9 @@ make_heatmap <- function(gem, labels, markers) {
 #' @param weights list of weighst of cluster specific genes as returned by scid_multiclass
 #' @export
 plot_score_2D <- function(gem, labels, markers, clusterID, weights) {
+  
+  rownames(gem) <- toupper(rownames(gem))
+  markers$gene <- toupper(markers$gene)
   
   markers <- markers[which(markers$cluster == clusterID), ]
   positive_markers <- intersect(markers$gene[which(markers$avg_logFC > 0)], rownames(gem))
@@ -67,8 +65,9 @@ plot_score_2D <- function(gem, labels, markers, clusterID, weights) {
     labels[which(labels != clusterID)] <- "Other cell type"
     df$label <- factor(labels[rownames(df)], levels = c(clusterID, "Other cell type"))
     
-    ggplot2::ggplot(df, aes(x=positive_score, y=negative_score, color=label)) + geom_point() + 
-      scale_color_manual(values=c("black", "lightgrey")) + theme_classic()
+    library(ggplot2)
+    ggplot(df, aes(x=positive_score, y=negative_score, color=label)) + geom_point() + 
+      scale_color_manual(values=c("black", "grey")) + theme_classic()
   }
 }
 
