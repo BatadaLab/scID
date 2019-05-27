@@ -15,7 +15,7 @@ make_heatmap <- function(gem, labels, markers) {
   
   celltypes <- unique(markers$cluster)
   
-  gem_avg <- matrix(NA, nrows, ncols)
+  gem_avg <- matrix(NA, length(celltypes), length(celltypes))
   for (i in 1:length(celltypes)) {
     cells <- na.omit(names(labels)[which(labels == celltypes[i])])
     if (length(cells) >= 1) {
