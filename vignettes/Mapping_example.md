@@ -1,6 +1,6 @@
 ---
 title: "Identification of equivalent cells across single-cell RNA-seq datasets"
-date: "`r Sys.Date()`"
+date: `r Sys.Date()`
 output: rmarkdown::html_vignette
 vignette: >
     %\VignetteIndexEntry{Vignette Title}  
