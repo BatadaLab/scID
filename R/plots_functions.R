@@ -5,6 +5,15 @@
 #' @export
 make_heatmap <- function(gem, labels, markers) {
   
+  # First check if gem and labels have same cells
+  common_cells <- intersect(colnames(gem), names(labels))
+  if (length(common_cells) == 0) {
+    stop("Cell names between labels and gem do not match! Please make sure you have provided labels for the cells of the gem.")
+  } else {
+    gem <- gem[, common_cells]
+    labels <- labels[common_cells]
+  }
+  
   rownames(gem) <- make.names(toupper(rownames(gem)), unique=TRUE)
   markers$gene <- toupper(markers$gene)
 
@@ -19,12 +28,12 @@ make_heatmap <- function(gem, labels, markers) {
   for (i in 1:length(celltypes)) {
     cells <- na.omit(names(labels)[which(labels == celltypes[i])])
     if (length(cells) >= 1) {
-      avg_exp <- rowMeans(gem[toupper(markers$gene), cells, drop = FALSE])
+      avg_exp <- rowMeans(gem[markers$gene, cells, drop = FALSE])
     } else {
       next
     }
     for (j in 1:length(celltypes)) {
-      gem_avg[j,i] <- mean(na.omit(avg_exp[toupper(markers$gene[which(markers$cluster == celltypes[j])])]))
+      gem_avg[j,i] <- mean(avg_exp[markers$gene[which(markers$cluster == celltypes[j])]], na.rm = TRUE)
     }
   }
   
