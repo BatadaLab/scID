@@ -71,8 +71,9 @@ plot_score_2D <- function(gem, labels, markers, clusterID, weights) {
     
     df <- data.frame(positive_score = colSums(weighted_gem[positive_markers, , drop=FALSE])/sqrt(sum(weights[[clusterID]][positive_markers]^2)), 
                      negative_score = colSums(weighted_gem[negative_markers, , drop=FALSE])/sqrt(sum(weights[[clusterID]][negative_markers]^2)))
-    labels[which(labels != clusterID)] <- "Other cell type"
-    df$label <- factor(labels[rownames(df)], levels = c(clusterID, "Other cell type"))
+    df$label <- rep("Other cell type", nrow(df))
+    df[names(labels)[which(labels == clusterID)], "label"] <- clusterID
+    df$label <- factor(df$label, levels = c(clusterID, "Other cell type"))
     
     library(ggplot2)
     ggplot(df, aes(x=positive_score, y=negative_score, color=label)) + geom_point() + 
