@@ -131,12 +131,15 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
     celltype <- as.character(celltypes[i])
     signature <- intersect(names(weights[[celltype]]), rownames(target_gem_norm))
     weighted_gem <- weights[[celltype]][signature] * target_gem_norm[signature, ,drop=FALSE]
-    
-    score <- colSums(weighted_gem)/sqrt(sum(weights[[celltype]]^2))
-    matches <- final_populations(score) 
-    scores[as.character(celltype), matches] <- scale(score[matches])
-    full_scores[as.character(celltype), ] <- score
-    
+    # Check if whole weighted gem is 0 (when all gene weighst are zero)
+    if (all(weighted_gem == 0)) {
+      full_scores[as.character(celltype), ] <- rep(0, ncol(full_scores))
+    } else {
+      score <- colSums(weighted_gem)/sqrt(sum(weights[[celltype]]^2))
+      matches <- final_populations(score) 
+      scores[as.character(celltype), matches] <- scale(score[matches])
+      full_scores[as.character(celltype), ] <- score
+    }
     if (i==length(celltypes)) cat("Done!")
   }
   
