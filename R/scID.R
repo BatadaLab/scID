@@ -86,6 +86,10 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
         training_groups <- choose_training_set(target_gem, positive_markers, negative_markers)
         signature_genes <- c(positive_markers, negative_markers)
         gene.weights <- scID_weight(target_gem_norm[signature_genes, , drop=FALSE], training_groups$in_pop, training_groups$out_pop)
+        # If only positive markers are selected, truncate all negative weights to 0
+        if (only_pos) {
+          gene.weights[which(gene.weights < 0)] <- 0
+        }
         weights[[as.character(celltypes[i])]] <- gene.weights
         if (i==length(celltypes)) cat("Done!")
       }
@@ -106,6 +110,10 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
           gene.weights <- scID_weight(gem = ref_gem_norm[signature_genes, ,drop=FALSE], true_cells, false_cells)
   
           weights[[as.character(celltypes[i])]] <- gene.weights
+          # If only positive markers are selected, truncate all negative weights to 0
+          if (only_pos) {
+            gene.weights[which(gene.weights < 0)] <- 0
+          }
           if (i==length(celltypes)) cat("Done!")
         }
         # Won't need reference data any more, remove for efficiency
