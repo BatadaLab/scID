@@ -56,18 +56,27 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
     sds[ID, "recall"] <- sd(data[which(fit$classification == ID), "recall"]) 
   }
   
+  IN_candidates <- unique(c(rownames(centroids)[which(centroids$recall == max(centroids$recall))], rownames(centroids)[which(centroids$precision == max(centroids$precision))]))
+                    
   E_dist <- apply(centroids, 1, function(x) sqrt((1-x[1])^2 + (1-x[2])^2))
   
   IN_id <- names(E_dist)[which(E_dist == min(E_dist))]
   
-  precision_theshold <- centroids[IN_id, "precision"] - 2*sds[IN_id, "precision"]
-  recall_theshold <- centroids[IN_id, "recall"] - 2*sds[IN_id, "recall"]
+  #precision_theshold <- centroids[IN_id, "precision"] - 2*sds[IN_id, "precision"]
+  #recall_theshold <- centroids[IN_id, "recall"] - 2*sds[IN_id, "recall"]
   
   IN_cells <- colnames(gem)[which(fit$classification %in% IN_id)]
-  
+  # If there are two clusters found as candidate IN remove the one that is farthest from (1,1)
+  other_IN <- setdiff(IN_candidates, IN_id)
+  if (length(other_IN) == 1) {
+    NA_cells <- colnames(gem)[which(fit$classification %in% other_IN)]
+  } else {
+    NA_cells <- c()
+  }
   # Get OUT cells removing those that are in the IN radious
-  rest_cells <- setdiff(colnames(gem), IN_cells)
-  OUT_cells <- intersect(rownames(data)[intersect(which(data$precision < precision_theshold), which(data$recall < recall_theshold))], rest_cells)
+  #rest_cells <- setdiff(colnames(gem), IN_cells)
+  #OUT_cells <- intersect(rownames(data)[intersect(which(data$precision < precision_theshold), which(data$recall < recall_theshold))], rest_cells)
+  OUT_cells <- setdiff(rownames(data), c(IN_cells, NA_cells))
   
   return(list(in_pop=IN_cells, out_pop=OUT_cells))
   # centroids <- data.frame(matrix(NA, length(unique(fit$classification)), 2), row.names = unique(fit$classification))
