@@ -58,7 +58,7 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   
   E_dist <- apply(centroids, 1, function(x) sqrt((1-x[1])^2 + (1-x[2])^2))
   
-  IN_id <- as.character(which(E_dist == min(E_dist)))
+  IN_id <- names(E_dist)[which(E_dist == min(E_dist))]
   
   precision_theshold <- centroids[IN_id, "precision"] - 2*sds[IN_id, "precision"]
   recall_theshold <- centroids[IN_id, "recall"] - 2*sds[IN_id, "recall"]
