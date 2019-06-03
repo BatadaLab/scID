@@ -18,19 +18,15 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   # Find total number of expressed genes per cell (n_e)
   n_e <- rowSums(binned_gem)
   # Find total number of expressed positive marker genes per cell (n_pme)
-  if (length(positive_markers) > 1) {
-    n_pme <- rowSums(binned_gem[, positive_markers])
-  } else if (length(positive_markers) == 1) {
-    n_pme <- binned_gem[, positive_markers]
+  if (length(positive_markers) >= 1) {
+    n_pme <- rowSums(binned_gem[, positive_markers, drop = FALSE])
   } else {
     n_pme <- rep(0, nrow(binned_gem))
     names(n_pme) <- rownames(binned_gem)
   }
   # Find total number of expressed negative marker genes per cell (n_nme)
-  if (length(negative_markers) > 1) {
-    n_nme <- rowSums(binned_gem[, negative_markers])
-  } else if (length(negative_markers) == 1) {
-    n_nme <- binned_gem[, negative_markers]
+  if (length(negative_markers) >= 1) {
+    n_nme <- rowSums(binned_gem[, negative_markers, drop = FALSE])
   } else {
     n_nme <- rep(0, nrow(binned_gem))
     names(n_nme) <- rownames(binned_gem)
@@ -41,6 +37,7 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   n_nm <- max(length(negative_markers), 1)
   
   data <- data.frame(recall = (n_pme/n_pm) - (n_nme/n_nm), precision = (n_pme-n_nme)/n_e)
+  rownames(data) <- colnames(gem)
   data <- data[complete.cases(data), ]
   
   library(mclust)
@@ -61,7 +58,7 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   
   E_dist <- apply(centroids, 1, function(x) sqrt((1-x[1])^2 + (1-x[2])^2))
   
-  IN_id <- as.character(which(E_dist == max(E_dist)))
+  IN_id <- as.character(which(E_dist == min(E_dist)))
   
   precision_theshold <- centroids[IN_id, "precision"] - 2*sds[IN_id, "precision"]
   recall_theshold <- centroids[IN_id, "recall"] - 2*sds[IN_id, "recall"]
