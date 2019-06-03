@@ -50,20 +50,45 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   # Get centroids of each cluster
   centroids <- data.frame(matrix(NA, length(unique(fit$classification)), 2), row.names = unique(fit$classification))
   colnames(centroids) <- c("precision", "recall")
+  sds <- data.frame(matrix(NA, length(unique(fit$classification)), 2), row.names = unique(fit$classification))
+  colnames(sds) <- c("precision", "recall")
   for (ID in rownames(centroids)) {
     centroids[ID, "precision"] <- mean(data[which(fit$classification == ID), "precision"]) 
+    sds[ID, "precision"] <- sd(data[which(fit$classification == ID), "precision"]) 
     centroids[ID, "recall"] <- mean(data[which(fit$classification == ID), "recall"]) 
+    sds[ID, "recall"] <- sd(data[which(fit$classification == ID), "recall"]) 
   }
   
-  # Choose both
-  IN_id <- unique(c(rownames(centroids)[which(centroids$recall == max(centroids$recall))], 
-                    rownames(centroids)[which(centroids$precision == max(centroids$precision))]))
-  # # Choose only if same cluster has both recall and precision max values
-  # IN_id <- intersect(rownames(centroids)[which(centroids$recall == max(centroids$recall))], 
-  #                    rownames(centroids)[which(centroids$precision == max(centroids$precision))])
-
-  in_pop <- colnames(gem)[which(fit$classification %in% IN_id)]
-  return(list(in_pop=in_pop, out_pop=setdiff(colnames(gem), in_pop)))
+  E_dist <- apply(centroids, 1, function(x) sqrt((1-x[1])^2 + (1-x[2])^2))
+  
+  IN_id <- as.character(which(E_dist == max(E_dist)))
+  
+  precision_theshold <- centroids[IN_id, "precision"] - 2*sds[IN_id, "precision"]
+  recall_theshold <- centroids[IN_id, "recall"] - 2*sds[IN_id, "recall"]
+  
+  IN_cells <- colnames(gem)[which(fit$classification %in% IN_id)]
+  
+  # Get OUT cells removing those that are in the IN radious
+  rest_cells <- setdiff(colnames(gem), IN_cells)
+  OUT_cells <- intersect(rownames(data)[intersect(which(data$precision < precision_theshold), which(data$recall < recall_theshold))], rest_cells)
+  
+  return(list(in_pop=IN_cells, out_pop=OUT_cells))
+  # centroids <- data.frame(matrix(NA, length(unique(fit$classification)), 2), row.names = unique(fit$classification))
+  # colnames(centroids) <- c("precision", "recall")
+  # for (ID in rownames(centroids)) {
+  #   centroids[ID, "precision"] <- mean(data[which(fit$classification == ID), "precision"]) 
+  #   centroids[ID, "recall"] <- mean(data[which(fit$classification == ID), "recall"]) 
+  # }
+  # 
+  # # Choose both
+  # IN_id <- unique(c(rownames(centroids)[which(centroids$recall == max(centroids$recall))], 
+  #                   rownames(centroids)[which(centroids$precision == max(centroids$precision))]))
+  # # # Choose only if same cluster has both recall and precision max values
+  # # IN_id <- intersect(rownames(centroids)[which(centroids$recall == max(centroids$recall))], 
+  # #                    rownames(centroids)[which(centroids$precision == max(centroids$precision))])
+  # 
+  # in_pop <- colnames(gem)[which(fit$classification %in% IN_id)]
+  # return(list(in_pop=in_pop, out_pop=setdiff(colnames(gem), in_pop)))
 }
 
 #' Main function for estimation of gene ranks
