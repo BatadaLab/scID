@@ -16,4 +16,5 @@ final_populations <- function(score) {
   
   matches <- names(fit$classification)[which(fit$classification == names(which(avgScore == max(avgScore))))]
   
+  return(matches)
 }

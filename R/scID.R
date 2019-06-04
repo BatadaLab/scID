@@ -90,6 +90,8 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
         if (only_pos) {
           gene.weights[which(gene.weights < 0)] <- 0
         }
+        # Make Inf weights 0
+        gene.weights[is.infinite(gene.weights)] <- 0
         weights[[as.character(celltypes[i])]] <- gene.weights
         if (i==length(celltypes)) cat("Done!")
       }
