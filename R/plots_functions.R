@@ -22,7 +22,7 @@ make_heatmap <- function(gem, labels, markers) {
   # Keep markers present in gem
   markers <- markers[which(markers$gene %in% rownames(gem)), ]
   
-  celltypes <- c(unique(markers$cluster), unique(labels))
+  celltypes <- c(unique(as.character(markers$cluster)), unique(as.character(labels)))
   
   gem_avg <- matrix(NA, length(celltypes), length(celltypes))
   for (i in 1:length(celltypes)) {
