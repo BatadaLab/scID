@@ -22,7 +22,7 @@ make_heatmap <- function(gem, labels, markers) {
   # Keep markers present in gem
   markers <- markers[which(markers$gene %in% rownames(gem)), ]
   
-  celltypes <- c(unique(as.character(markers$cluster)), unique(as.character(labels)))
+  celltypes <- unique(c(unique(as.character(markers$cluster)), unique(as.character(labels))))
   
   gem_avg <- matrix(NA, length(celltypes), length(celltypes))
   for (i in 1:length(celltypes)) {
@@ -40,9 +40,16 @@ make_heatmap <- function(gem, labels, markers) {
   rownames(gem_avg) <- paste("gs", celltypes, sep = "_")
   colnames(gem_avg) <- paste("Cl", celltypes, sep = "_")
   # remove columns that are all NA
-  gem_avg <- gem_avg[, -which(apply(gem_avg, 2, function(x) all(is.na(x))))]
-  # remove rows that are all NA
-  gem_avg <- gem_avg[-which(apply(gem_avg, 1, function(x) all(is.na(x)))), ]
+  na.cols = which(apply(gem_avg, 2, function(x) all(is.na(x))))
+  if (length(na.cols) > 0) {
+    gem_avg <- gem_avg[, -na.cols]
+  }
+  na.rows = which(apply(gem_avg, 1, function(x) all(is.na(x))))
+  if (length(na.rows) > 0) {
+    # remove rows that are all NA
+    gem_avg <- gem_avg[-na.rows, ]
+  }
+  
   
   pheatmap::pheatmap(gem_avg, border="white", cluster_rows = F, cluster_cols = F, border_color = F, scale = "row")
 }
