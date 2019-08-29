@@ -104,7 +104,7 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
         ref_gem_norm <-  t(apply(reference_gem[unique(markers$gene), ], 1, function(x) normalize_gene(x)))
         ref_gem_norm <- ref_gem_norm[complete.cases(ref_gem_norm), ]
         for (i in 1:length(celltypes)) {
-          signature_genes <- markers[which(markers$cluster == celltypes[i]), "gene"]
+          signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
           true_cells <- names(reference_clusters)[which(reference_clusters == as.character(celltypes[i]))]
           false_cells <- setdiff(names(reference_clusters), true_cells)
           gene.weights <- scID_weight(gem = ref_gem_norm[signature_genes, ,drop=FALSE], true_cells, false_cells)
