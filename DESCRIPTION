@@ -1,6 +1,6 @@
 Package: scID
 Title: geneset-guided identification of cell types using single cell RNA-seq data
-Version: 0.0.0.9000
+Version: 2.1
 Authors@R: c(person("Katerina", "Boufea", 
              email = "katerina.boufea@ed.ac.uk", 
              role = c("aut", "cre")), 
