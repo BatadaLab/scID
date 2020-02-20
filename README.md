@@ -48,7 +48,9 @@ scID_output is a list of four objects
 ## Need help?
 To report bugs or ask any questions please use the [GitHub issues tracker](https://github.com/BatadaLab/scID/issues).
 
-
+## Cite
+If you use scID in your research, please considering citing:
+[Boufea et al., iScience 2020](https://www.sciencedirect.com/science/article/pii/S2589004220300985?via%3Dihub)
 
 
 
