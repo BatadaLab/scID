@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 There are three ways to use scID. 
 
-### Usage 1: Canonical usage
+### Usage 1: Canonical usage (for finding equivalent groups of cells across data)
 Given two datasets of single-cell RNA-seq gene expression for which cell grouping for one the datasets (reference) is known, scID seeks to find transcriptionally equivalent groups of cells for the second dataset (target).
 ```
 scID_output <- scID::scid_multiclass(target_gem, reference_gem, reference_clusters, ...)
@@ -39,7 +39,7 @@ scID_output is a list of two objects
 
 2. ```scID_output$markers``` A data frame of signature genes extracted from the reference clusters. 
 
-### Usage 2: Single reference but multiple targets (T1, T2)
+### Usage 2: Canonical usage (for finding equivalent groups of cells across data) with multiple targets (T1, T2)
 
 * Step 1: Extract markers from reference clusters
 ```
