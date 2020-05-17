@@ -1,11 +1,14 @@
-#' Function to plot heatmap of average cluster-specific geneset expression in clusters of cells
+#' Function to plot heatmap of average cluster-specific geneset 
+#' expression in clusters of cells
+#' 
 #' @param gem Data frame of gene expression (rows) per cell (columns) in target data
 #' @param labels List of cluster IDs for cells of gem
 #' @param markers Data frame of cluster specific genes with at least a "gene" and a "cluster" column
+#' 
 #' @export
 make_heatmap <- function(gem, labels, markers) {
   
-  # First check if gem and labels have same cells
+  # Keep only cells with available labels
   common_cells <- intersect(colnames(gem), names(labels))
   if (length(common_cells) == 0) {
     stop("Cell names between labels and gem do not match! Please make sure you have provided labels for the cells of the gem.")
@@ -50,16 +53,18 @@ make_heatmap <- function(gem, labels, markers) {
     gem_avg <- gem_avg[-na.rows, ]
   }
   
-  
   pheatmap::pheatmap(gem_avg, border="white", cluster_rows = F, cluster_cols = F, border_color = F, scale = "row")
 }
 
-#' Function to plot heatmap of average cluster-specific geneset expression in clusters of cells
+#' Function to plot heatmap of average cluster-specific geneset 
+#' expression in clusters of cells
+#' 
 #' @param gem Data frame of gene expression (rows) per cell (columns) in target data
 #' @param labels List of cluster IDs for cells of gem
 #' @param markers Data frame of cluster specific genes with at least "gene", "cluster" and "avg_logFC" columns
 #' @param clusterID cluster ID of cluster of interest
 #' @param weights list of weighst of cluster specific genes as returned by scid_multiclass
+#' 
 #' @export
 plot_score_2D <- function(gem, labels, markers, clusterID, weights) {
   

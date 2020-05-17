@@ -1,7 +1,9 @@
 #' Function to choose training IN and OUT populations using precision-recall
+#' 
 #' @param gem Data frame of gene expression of genes (rows) in cells (columns)
 #' @param positive_markers List of gene names expected to be upregulated in IN population
 #' @param negative_markers List of gene names expected to be downregulated in IN population
+#' 
 #' @return Lists of training IN and OUT cells
 #' @export
 choose_training_set <- function(gem, positive_markers, negative_markers) {
@@ -9,8 +11,6 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   positive_markers <- intersect(positive_markers, rownames(gem))
   negative_markers <- intersect(negative_markers, rownames(gem))
   # Bin values to 0 and 1 for present (expressed) and absent genes
-  #binned_gem <- apply(gem, 1, function(x) ifelse(x>quantile(x[which(x>0)], 0.25, na.rm = TRUE), 1, 0))
-  # biomod2::BinaryTransformation seems faster and more memory efficient
   sink("aux");
   binned_gem <- apply(gem, 1, function(x) biomod2::BinaryTransformation(x, threshold = quantile(x[which(x>0)], 0.25, na.rm = TRUE)))
   sink(NULL);
@@ -36,7 +36,10 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   # Find total number of negative marker genes (n_nm)
   n_nm <- max(length(negative_markers), 1)
   
-  data <- data.frame(recall = (n_pme/n_pm) - (n_nme/n_nm), precision = (n_pme-n_nme)/n_e)
+  data <- data.frame(
+    recall = (n_pme/n_pm) - (n_nme/n_nm), 
+    precision = (n_pme-n_nme)/n_e
+    )
   rownames(data) <- colnames(gem)
   data <- data[complete.cases(data), ]
   
@@ -44,6 +47,7 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   sink("aux");
   fit <- Mclust(data)
   sink(NULL);
+  
   # Get centroids of each cluster
   centroids <- data.frame(matrix(NA, length(unique(fit$classification)), 2), row.names = unique(fit$classification))
   colnames(centroids) <- c("precision", "recall")
@@ -62,10 +66,8 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   
   IN_id <- names(E_dist)[which(E_dist == min(E_dist))]
   
-  #precision_theshold <- centroids[IN_id, "precision"] - 2*sds[IN_id, "precision"]
-  #recall_theshold <- centroids[IN_id, "recall"] - 2*sds[IN_id, "recall"]
-  
   IN_cells <- colnames(gem)[which(fit$classification %in% IN_id)]
+  
   # If there are two clusters found as candidate IN remove the one that is farthest from (1,1)
   other_IN <- setdiff(IN_candidates, IN_id)
   if (length(other_IN) == 1) {
@@ -73,34 +75,19 @@ choose_training_set <- function(gem, positive_markers, negative_markers) {
   } else {
     NA_cells <- c()
   }
+  
   # Get OUT cells removing those that are in the IN radious
-  #rest_cells <- setdiff(colnames(gem), IN_cells)
-  #OUT_cells <- intersect(rownames(data)[intersect(which(data$precision < precision_theshold), which(data$recall < recall_theshold))], rest_cells)
   OUT_cells <- setdiff(rownames(data), c(IN_cells, NA_cells))
   
-  return(list(in_pop=IN_cells, out_pop=OUT_cells))
-  # centroids <- data.frame(matrix(NA, length(unique(fit$classification)), 2), row.names = unique(fit$classification))
-  # colnames(centroids) <- c("precision", "recall")
-  # for (ID in rownames(centroids)) {
-  #   centroids[ID, "precision"] <- mean(data[which(fit$classification == ID), "precision"]) 
-  #   centroids[ID, "recall"] <- mean(data[which(fit$classification == ID), "recall"]) 
-  # }
-  # 
-  # # Choose both
-  # IN_id <- unique(c(rownames(centroids)[which(centroids$recall == max(centroids$recall))], 
-  #                   rownames(centroids)[which(centroids$precision == max(centroids$precision))]))
-  # # # Choose only if same cluster has both recall and precision max values
-  # # IN_id <- intersect(rownames(centroids)[which(centroids$recall == max(centroids$recall))], 
-  # #                    rownames(centroids)[which(centroids$precision == max(centroids$precision))])
-  # 
-  # in_pop <- colnames(gem)[which(fit$classification %in% IN_id)]
-  # return(list(in_pop=in_pop, out_pop=setdiff(colnames(gem), in_pop)))
+  list(in_pop=IN_cells, out_pop=OUT_cells)
 }
 
 #' Main function for estimation of gene ranks
+#' 
 #' @param gem Data frame of signature genes in cells
 #' @param true_cells List of training IN cells
 #' @param false_cells List of training OUT cells
+#' 
 #' @return List of weights for signature genes
 #' @export
 scID_weight <- function(gem, true_cells, false_cells) {
@@ -115,5 +102,5 @@ scID_weight <- function(gem, true_cells, false_cells) {
   }
   weights[which(is.na(weights))] <- 0
 
-  return(weights)
+  weights
 }

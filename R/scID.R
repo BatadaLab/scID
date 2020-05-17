@@ -1,4 +1,6 @@
-#' Main function to get Gene expression matrix and signature genes and return matches and scores
+#' Main function to get Gene expression matrix and signature genes 
+#' and return matches and scores
+#' 
 #' @param target_gem Data frame of gene expression (rows) per cell (columns) in target data
 #' @param reference_gem Data frame of gene expression (rows) per cell (columns) in reference data
 #' @param reference_clusters Named list of cluster IDs of reference cells
@@ -7,16 +9,22 @@
 #' @param use_reference_for_weights Logical to use either reference or target data for sorting the signature genes
 #' @param only_pos Logical to include negative markers in the cluster specific gene sets
 #' @param normalize_reference Logical to select if reference data need to be normalized (when raw counts have been provided)
+#' 
 #' @return list of cluster IDs for target cells
 #' @return scID scores for target cells 
 #' @return markers used 
 #' @return estimated gene weights
+#' 
 #' @export
-scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_clusters = NULL, markers = NULL,
-                            logFC = 0.5, estimate_weights_from_target = FALSE, weights = NULL, only_pos=FALSE, normalize_reference=TRUE){
+scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, 
+                            reference_clusters = NULL, markers = NULL,
+                            logFC = 0.5, normalize_reference=TRUE,
+                            estimate_weights_from_target = FALSE, 
+                            weights = NULL, only_pos=FALSE) {
   
-  #----------------------------------------------------------------------------------------------------
+  # ----------------------------------------------------------------------------------------------------
   # Data pre-processing
+  # ----------------------------------------------------------------------------------------------------
   if (is.null(reference_gem) && is.null(reference_clusters) && is.null(markers)) {
     stop("Please provide either clustered reference data or list of markers for each reference cluster")
   } 
@@ -34,6 +42,7 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
       reference_clusters <- reference_clusters[common_cells]
     }
   }
+  
   if (!is.null(markers)) {
     # Check markers have gene and cluster columns
     if (length(intersect(c("gene", "cluster"), colnames(markers))) !=2 ) {
@@ -50,9 +59,8 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
 
   # ----------------------------------------------------------------------------------------------------
   # Stage 1: Find signature genes from reference data
+  # ----------------------------------------------------------------------------------------------------
   if (is.null(markers)) {
-    # ----------------------------------------------------------------------------------------------------
-    # Stage 1: Find signature genes from reference data
     message("Stage 1: extract signatures genes from reference clusters")
     markers <- find_markers(reference_gem, reference_clusters, logFC, only.pos=only_pos, normalize_reference=normalize_reference)
     # Filter out signature genes that are not present in the target data
@@ -66,13 +74,13 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
     celltypes <- unique(markers$cluster)
   }
 
-  # ----------------------------------------------------------------------------------------------------
   # Min-max normalization of target gem
   target_gem_norm <- t(apply(target_gem[unique(markers$gene), ], 1, function(x) normalize_gene(x)))
   target_gem_norm <- target_gem_norm[complete.cases(target_gem_norm), ]
   
   # ----------------------------------------------------------------------------------------------------
   # Stage 2: Weight signature genes
+  # ----------------------------------------------------------------------------------------------------
   if (is.null(weights)) {
     if (estimate_weights_from_target) {
       message("Stage 2: Estimate weights of signature genes from target")
@@ -101,7 +109,7 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
         message("Stage 2: Estimate weights of signature genes from reference")
         weights <- list()
         # Normalize reference gem
-        ref_gem_norm <-  t(apply(reference_gem[unique(markers$gene), ], 1, function(x) normalize_gene(x)))
+        ref_gem_norm <- t(apply(reference_gem[unique(markers$gene), ], 1, function(x) normalize_gene(x)))
         ref_gem_norm <- ref_gem_norm[complete.cases(ref_gem_norm), ]
         for (i in 1:length(celltypes)) {
           signature_genes <- markers$gene[which(markers$cluster == celltypes[i])]
@@ -127,8 +135,8 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
   }
 
   #----------------------------------------------------------------------------------------------------
-  # Stage 3
-  # Find scores and putative matches
+  # Stage 3: Find scores and putative matches
+  # ----------------------------------------------------------------------------------------------------
   message("Stage 3.1-2: Calculate scores and find matching cells")
   
   scores <- data.frame(matrix(NA, length(celltypes), ncol(target_gem)), row.names = celltypes)
@@ -158,7 +166,7 @@ scid_multiclass <- function(target_gem = NULL, reference_gem = NULL, reference_c
   labels <- apply(scores, 2, function(x) {ifelse(all(is.na(x)), "unassigned", rownames(scores)[which(x == max(x, na.rm = T))])})
 
   # return result
-  return(list(markers=markers, estimated_weights=weights, labels=labels, scores=full_scores))
+  list(markers=markers, estimated_weights=weights, labels=labels, scores=full_scores)
 
 }
 
