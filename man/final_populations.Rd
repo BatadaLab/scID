@@ -2,7 +2,8 @@
 % Please edit documentation in R/fit_GMM.R
 \name{final_populations}
 \alias{final_populations}
-\title{Function to identify matching population from scID score by fitting a Gaussian finite mixture model from Mclust}
+\title{Function to identify matching population from scID score by fitting 
+a Gaussian finite mixture model from Mclust}
 \usage{
 final_populations(score)
 }
@@ -13,5 +14,6 @@ final_populations(score)
 List of matching cells
 }
 \description{
-Function to identify matching population from scID score by fitting a Gaussian finite mixture model from Mclust
+Function to identify matching population from scID score by fitting 
+a Gaussian finite mixture model from Mclust
 }

@@ -5,8 +5,13 @@
 \title{Function to extract cluster specific genes from reference clusters.
 This function uses MAST test as implemented in the Seurat package.}
 \usage{
-find_markers(reference_gem, reference_clusters, logFC, only.pos,
-  normalize_reference)
+find_markers(
+  reference_gem,
+  reference_clusters,
+  logFC,
+  only.pos,
+  normalize_reference
+)
 }
 \arguments{
 \item{reference_gem}{Data frame of gene expression (rows) per cell (columns) in reference data}

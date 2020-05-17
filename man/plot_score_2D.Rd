@@ -2,7 +2,8 @@
 % Please edit documentation in R/plots_functions.R
 \name{plot_score_2D}
 \alias{plot_score_2D}
-\title{Function to plot heatmap of average cluster-specific geneset expression in clusters of cells}
+\title{Function to plot heatmap of average cluster-specific geneset 
+expression in clusters of cells}
 \usage{
 plot_score_2D(gem, labels, markers, clusterID, weights)
 }
@@ -18,5 +19,6 @@ plot_score_2D(gem, labels, markers, clusterID, weights)
 \item{weights}{list of weighst of cluster specific genes as returned by scid_multiclass}
 }
 \description{
-Function to plot heatmap of average cluster-specific geneset expression in clusters of cells
+Function to plot heatmap of average cluster-specific geneset 
+expression in clusters of cells
 }
