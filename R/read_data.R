@@ -24,10 +24,10 @@ gmt_to_markers <- function(gmt_file) {
   
   data <- qusage::read.gmt(gmt_file)
   celltypes <- names(data)
-  markers <- data.frame(gene = NA, cluster = NA, avg_logFC = NA)
+  markers <- data.frame(gene = NA, cluster = NA, avg_log2FC = NA)
   for (ct in celltypes) {
     
-    m <- data.frame(gene = data[[ct]], cluster = ct, avg_logFC = 1)
+    m <- data.frame(gene = data[[ct]], cluster = ct, avg_log2FC = 1)
     markers <- rbind(markers, m)
   }
   markers <- markers[complete.cases(markers), ]

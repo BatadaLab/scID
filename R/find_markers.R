@@ -3,7 +3,7 @@
 #' 
 #' @param reference_gem Data frame of gene expression (rows) per cell (columns) in reference data
 #' @param reference_clusters Named list of cluster IDs of reference cells
-#' @param logFC LogFC threshold for extracting markers from reference clusters
+#' @param logFC Log2FC threshold for extracting markers from reference clusters
 #' @param only.pos Logical to include negative markers in the cluster specific gene sets
 #' @param normalize_reference Logical to select if reference data need to be normalized (when raw counts have been provided)
 #' 

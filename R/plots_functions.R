@@ -72,8 +72,8 @@ plot_score_2D <- function(gem, labels, markers, clusterID, weights) {
   markers$gene <- toupper(markers$gene)
   
   markers <- markers[which(markers$cluster == clusterID), ]
-  positive_markers <- intersect(markers$gene[which(markers$avg_logFC > 0)], rownames(gem))
-  negative_markers <- intersect(markers$gene[which(markers$avg_logFC < 0)], rownames(gem))
+  positive_markers <- intersect(markers$gene[which(markers$avg_log2FC > 0)], rownames(gem))
+  negative_markers <- intersect(markers$gene[which(markers$avg_log2FC < 0)], rownames(gem))
   
   if (length(positive_markers) == 0) {
     stop("No positive markers available for this cell type")

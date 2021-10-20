@@ -18,7 +18,7 @@ find_markers(
 
 \item{reference_clusters}{Named list of cluster IDs of reference cells}
 
-\item{logFC}{LogFC threshold for extracting markers from reference clusters}
+\item{logFC}{Log2FC threshold for extracting markers from reference clusters}
 
 \item{only.pos}{Logical to include negative markers in the cluster specific gene sets}
 
