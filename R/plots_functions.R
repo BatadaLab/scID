@@ -21,7 +21,7 @@ make_heatmap <- function(gem, labels, markers) {
   markers$gene <- toupper(markers$gene)
 
   # Keep positive markers
-  markers <- markers[which(markers$avg_logFC > 0), ]
+  markers <- markers[which(markers$avg_log2FC > 0), ]
   # Keep markers present in gem
   markers <- markers[which(markers$gene %in% rownames(gem)), ]
   
